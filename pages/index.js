@@ -5,7 +5,7 @@ import styles from "../styles/Home.module.css";
 const initialState = {
     stemXOrigin: 200,
     stemYOrigin: 240,
-    spacerHeight: 50,
+    spacerHeight: 25,
     stemLength: 100,
 };
 
@@ -71,6 +71,8 @@ export default function Home() {
                 <span>Spacer Height</span>
                 <Slider
                     name="spacer"
+                    min={0}
+                    max={50}
                     defaultValue={state.spacerHeight}
                     value={state.spacerHeight}
                     aria-label="Default"
