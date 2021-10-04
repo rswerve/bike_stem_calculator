@@ -27,16 +27,16 @@ const reducer = (state, action) => {
 export default function Home() {
     const [state, setState] = useReducer(reducer, initialState);
     const topOfHTX =
-        state.stemXOrigin + Math.cos(getRadians(73)) * state.spacerHeight;
+        state.stemXOrigin + Math.cos(getRadians(107)) * state.spacerHeight;
     const topOfHTY =
-        state.stemYOrigin - Math.sin(getRadians(73)) * state.spacerHeight;
+        state.stemYOrigin - Math.sin(getRadians(107)) * state.spacerHeight;
 
     return (
         <div className={styles.container}>
             <div>
                 Rise:{" "}
                 {` ${Math.round(
-                    state.spacerHeight * Math.sin(getRadians(73)) +
+                    state.spacerHeight * Math.sin(getRadians(107)) +
                         state.stemLength * Math.sin(getRadians(6))
                 )}`}
             </div>
@@ -50,7 +50,7 @@ export default function Home() {
             <div>
                 Spacer Rise:{" "}
                 {` ${Math.round(
-                    state.spacerHeight * Math.sin(getRadians(73))
+                    state.spacerHeight * Math.sin(getRadians(107))
                 )}`}
             </div>
             <div>
@@ -114,14 +114,14 @@ export default function Home() {
                     aria-label="stem"
                     x1={
                         state.stemXOrigin +
-                        Math.cos(getRadians(73)) * state.spacerHeight
+                        Math.cos(getRadians(107)) * state.spacerHeight
                     }
                     y1={
                         state.stemYOrigin -
-                        Math.sin(getRadians(73)) * state.spacerHeight
+                        Math.sin(getRadians(107)) * state.spacerHeight
                     }
-                    x2={topOfHTX - Math.cos(getRadians(6)) * state.stemLength}
-                    y2={topOfHTY - Math.sin(getRadians(6)) * state.stemLength}
+                    x2={topOfHTX - Math.cos(getRadians(174)) * state.stemLength}
+                    y2={topOfHTY - Math.sin(getRadians(174)) * state.stemLength}
                     stroke="blue"
                     strokeWidth="5"
                 />
