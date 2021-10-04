@@ -36,14 +36,36 @@ export default function Home() {
             <div>
                 Rise:{" "}
                 {` ${Math.round(
-                    state.spacerHeight * Math.sin(getRadians(73))
+                    state.spacerHeight * Math.sin(getRadians(73)) +
+                        state.stemLength * Math.sin(getRadians(6))
                 )}`}
             </div>
             <div>
                 Run:{" "}
+                {` ${Math.round(
+                    state.stemLength * Math.sin(getRadians(84)) -
+                        state.spacerHeight * Math.sin(getRadians(17))
+                )}`}
+            </div>
+            <div>
+                Spacer Rise:{" "}
+                {` ${Math.round(
+                    state.spacerHeight * Math.sin(getRadians(73))
+                )}`}
+            </div>
+            <div>
+                Spacer Run:{" "}
                 {` ${-Math.round(
                     state.spacerHeight * Math.sin(getRadians(17))
                 )}`}
+            </div>
+            <div>
+                Stem Rise:{" "}
+                {` ${Math.round(state.stemLength * Math.sin(getRadians(6)))}`}
+            </div>
+            <div>
+                Stem Run:{" "}
+                {` ${Math.round(state.stemLength * Math.sin(getRadians(84)))}`}
             </div>
             <div className={styles.slider}>
                 <span>Spacer Height</span>
@@ -96,8 +118,8 @@ export default function Home() {
                         state.stemYOrigin -
                         Math.sin(getRadians(73)) * state.spacerHeight
                     }
-                    x2={topOfHTX - Math.cos(getRadians(0)) * state.stemLength}
-                    y2={topOfHTY - Math.sin(getRadians(0)) * state.stemLength}
+                    x2={topOfHTX - Math.cos(getRadians(6)) * state.stemLength}
+                    y2={topOfHTY - Math.sin(getRadians(6)) * state.stemLength}
                     stroke="blue"
                     strokeWidth="5"
                 />
