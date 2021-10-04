@@ -1,18 +1,24 @@
 import { useReducer } from "react";
-import { Slider } from "@mui/material";
+import { Input, Slider } from "@mui/material";
 import styles from "../styles/Home.module.css";
 
 const initialState = {
-    stemXOrigin: 0,
-    stemYOrigin: 150,
-    stemLength: 50,
+    stemXOrigin: 200,
+    stemYOrigin: 240,
     spacerHeight: 50,
+    stemLength: 100,
+};
+
+const getRadians = (angleDegrees) => {
+    return (Math.PI / 180.0) * angleDegrees;
 };
 
 const reducer = (state, action) => {
-    console.log("state: ", state);
-    console.log("action: ", action);
+    // console.log("state: ", state);
+    // console.log("action: ", action.value);
     switch (action.slider) {
+        case "spacer":
+            return { ...state, ...action, spacerHeight: action.value };
         case "stem":
             return { ...state, ...action, stemLength: action.value };
     }
@@ -20,31 +26,79 @@ const reducer = (state, action) => {
 
 export default function Home() {
     const [state, setState] = useReducer(reducer, initialState);
+    const topOfHTX =
+        state.stemXOrigin + Math.cos(getRadians(73)) * state.spacerHeight;
+    const topOfHTY =
+        state.stemYOrigin - Math.sin(getRadians(73)) * state.spacerHeight;
+
     return (
         <div className={styles.container}>
-            <Slider
-                name="stem"
-                defaultValue={state.stemLength}
-                value={state.stemLength}
-                aria-label="Default"
-                valueLabelDisplay="auto"
-                onChange={(event, value) =>
-                    // console.log(event, value) ||
-                    setState({ slider: event.target.name, value: value })
-                }
-            />
+            <div>
+                Rise:{" "}
+                {` ${Math.round(
+                    state.spacerHeight * Math.sin(getRadians(73))
+                )}`}
+            </div>
+            <div>
+                Run:{" "}
+                {` ${-Math.round(
+                    state.spacerHeight * Math.sin(getRadians(17))
+                )}`}
+            </div>
+            <div className={styles.slider}>
+                <span>Spacer Height</span>
+                <Slider
+                    name="spacer"
+                    defaultValue={state.spacerHeight}
+                    value={state.spacerHeight}
+                    aria-label="Default"
+                    valueLabelDisplay="auto"
+                    onChange={(event, value) =>
+                        setState({ slider: event.target.name, value: value })
+                    }
+                />
+                <span>Stem Length</span>
+                <Slider
+                    name="stem"
+                    min={70}
+                    max={140}
+                    defaultValue={state.stemLength}
+                    value={state.stemLength}
+                    aria-label="Default"
+                    valueLabelDisplay="auto"
+                    onChange={(event, value) =>
+                        setState({ slider: event.target.name, value: value })
+                    }
+                />
+            </div>
             <svg
-                width="200"
-                height="250"
+                width="400"
+                height="500"
                 version="1.1"
                 xmlns="http://www.w3.org/2000/svg"
             >
                 <line
+                    aria-label="spacer"
                     x1={state.stemXOrigin}
                     y1={state.stemYOrigin}
-                    x2="200"
-                    y2={state.stemYOrigin + state.stemLength}
+                    x2={topOfHTX}
+                    y2={topOfHTY}
                     stroke="orange"
+                    strokeWidth="5"
+                />
+                <line
+                    aria-label="stem"
+                    x1={
+                        state.stemXOrigin +
+                        Math.cos(getRadians(73)) * state.spacerHeight
+                    }
+                    y1={
+                        state.stemYOrigin -
+                        Math.sin(getRadians(73)) * state.spacerHeight
+                    }
+                    x2={topOfHTX - Math.cos(getRadians(0)) * state.stemLength}
+                    y2={topOfHTY - Math.sin(getRadians(0)) * state.stemLength}
+                    stroke="blue"
                     strokeWidth="5"
                 />
             </svg>
