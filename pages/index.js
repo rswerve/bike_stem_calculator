@@ -53,7 +53,7 @@ export default function Home() {
             {/* note subtraction */}
             <div>Run: {Math.round(stemRun - spacerRun)} </div>
             <div>Spacer Rise: {Math.round(spacerRise)}</div>
-            <div>Spacer Run:{Math.round(spacerRun)}</div>
+            <div>Spacer Run:{-Math.round(spacerRun)}</div>
             <div>Stem Rise:{Math.round(stemRise)}</div>
             <div>Stem Run:{Math.round(stemRun)}</div>
             <div className={styles.slider}>
