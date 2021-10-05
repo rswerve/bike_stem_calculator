@@ -7,6 +7,8 @@ const initialState = {
     stemYOrigin: 240,
     spacerHeight: 25,
     stemLength: 100,
+    angleHt: 73,
+    angleStem: 0,
 };
 
 const getRadians = (angleDegrees) => {
@@ -21,52 +23,39 @@ const reducer = (state, action) => {
             return { ...state, ...action, spacerHeight: action.value };
         case "stem":
             return { ...state, ...action, stemLength: action.value };
+        case "angleHt":
+            return { ...state, ...action, angleHt: action.value };
+        case "angleStem":
+            return { ...state, ...action, angleStem: action.value };
     }
 };
 
 export default function Home() {
     const [state, setState] = useReducer(reducer, initialState);
+    const flippedHeadtubeAngle = 90 + (90 - state.angleHt);
+    const stemAngle = 180 - state.angleStem;
     const topOfHTX =
-        state.stemXOrigin + Math.cos(getRadians(107)) * state.spacerHeight;
+        state.stemXOrigin +
+        Math.cos(getRadians(flippedHeadtubeAngle)) * state.spacerHeight;
     const topOfHTY =
-        state.stemYOrigin - Math.sin(getRadians(107)) * state.spacerHeight;
+        state.stemYOrigin -
+        Math.sin(getRadians(flippedHeadtubeAngle)) * state.spacerHeight;
+    const spacerRise = state.spacerHeight * Math.sin(getRadians(state.angleHt));
+    const spacerRun =
+        state.spacerHeight * Math.sin(getRadians(90 - state.angleHt));
+    const stemRise = state.stemLength * Math.sin(getRadians(state.angleStem));
+    const stemRun =
+        state.stemLength * Math.sin(getRadians(90 - state.angleStem));
 
     return (
         <div className={styles.container}>
-            <div>
-                Rise:{" "}
-                {` ${Math.round(
-                    state.spacerHeight * Math.sin(getRadians(107)) +
-                        state.stemLength * Math.sin(getRadians(6))
-                )}`}
-            </div>
-            <div>
-                Run:{" "}
-                {` ${Math.round(
-                    state.stemLength * Math.sin(getRadians(84)) -
-                        state.spacerHeight * Math.sin(getRadians(17))
-                )}`}
-            </div>
-            <div>
-                Spacer Rise:{" "}
-                {` ${Math.round(
-                    state.spacerHeight * Math.sin(getRadians(107))
-                )}`}
-            </div>
-            <div>
-                Spacer Run:{" "}
-                {` ${-Math.round(
-                    state.spacerHeight * Math.sin(getRadians(17))
-                )}`}
-            </div>
-            <div>
-                Stem Rise:{" "}
-                {` ${Math.round(state.stemLength * Math.sin(getRadians(6)))}`}
-            </div>
-            <div>
-                Stem Run:{" "}
-                {` ${Math.round(state.stemLength * Math.sin(getRadians(84)))}`}
-            </div>
+            <div>Rise: {Math.round(spacerRise + stemRise)}</div>
+            {/* note subtraction */}
+            <div>Run: {Math.round(stemRun - spacerRun)} </div>
+            <div>Spacer Rise: {Math.round(spacerRise)}</div>
+            <div>Spacer Run:{Math.round(spacerRun)}</div>
+            <div>Stem Rise:{Math.round(stemRise)}</div>
+            <div>Stem Run:{Math.round(stemRun)}</div>
             <div className={styles.slider}>
                 <span>Spacer Height</span>
                 <Slider
@@ -94,6 +83,33 @@ export default function Home() {
                         setState({ slider: event.target.name, value: value })
                     }
                 />
+                <span>Headtube Angle</span>
+                <Slider
+                    name="angleHt"
+                    min={65}
+                    max={85}
+                    step={0.25}
+                    defaultValue={state.angleHt}
+                    value={state.angleHt}
+                    aria-label="Default"
+                    valueLabelDisplay="auto"
+                    onChange={(event, value) =>
+                        setState({ slider: event.target.name, value: value })
+                    }
+                />
+                <span>Stem Angle</span>
+                <Slider
+                    name="angleStem"
+                    min={-30}
+                    max={30}
+                    defaultValue={state.angleStem}
+                    value={state.angleStem}
+                    aria-label="Default"
+                    valueLabelDisplay="auto"
+                    onChange={(event, value) =>
+                        setState({ slider: event.target.name, value: value })
+                    }
+                />
             </div>
             <svg
                 width="400"
@@ -114,14 +130,22 @@ export default function Home() {
                     aria-label="stem"
                     x1={
                         state.stemXOrigin +
-                        Math.cos(getRadians(107)) * state.spacerHeight
+                        Math.cos(getRadians(flippedHeadtubeAngle)) *
+                            state.spacerHeight
                     }
                     y1={
                         state.stemYOrigin -
-                        Math.sin(getRadians(107)) * state.spacerHeight
+                        Math.sin(getRadians(flippedHeadtubeAngle)) *
+                            state.spacerHeight
                     }
-                    x2={topOfHTX - Math.cos(getRadians(174)) * state.stemLength}
-                    y2={topOfHTY - Math.sin(getRadians(174)) * state.stemLength}
+                    x2={
+                        topOfHTX -
+                        Math.cos(getRadians(stemAngle)) * state.stemLength
+                    }
+                    y2={
+                        topOfHTY -
+                        Math.sin(getRadians(stemAngle)) * state.stemLength
+                    }
                     stroke="blue"
                     strokeWidth="5"
                 />
