@@ -61,14 +61,24 @@ export default function Home() {
                 <Slider
                     name="spacer"
                     min={0}
-                    max={50}
+                    max={80}
                     defaultValue={state.spacerHeight}
                     value={state.spacerHeight}
                     aria-label="Default"
-                    valueLabelDisplay="auto"
+                    valueLabelDisplay="on"
                     onChange={(event, value) =>
                         setState({ slider: event.target.name, value: value })
                     }
+                    marks={[
+                        {
+                            value: 0,
+                            label: "0mm",
+                        },
+                        {
+                            value: 80,
+                            label: "80mm",
+                        },
+                    ]}
                 />
                 <span>Stem Length</span>
                 <Slider
@@ -78,10 +88,20 @@ export default function Home() {
                     defaultValue={state.stemLength}
                     value={state.stemLength}
                     aria-label="Default"
-                    valueLabelDisplay="auto"
+                    valueLabelDisplay="on"
                     onChange={(event, value) =>
                         setState({ slider: event.target.name, value: value })
                     }
+                    marks={[
+                        {
+                            value: 70,
+                            label: "70mm",
+                        },
+                        {
+                            value: 140,
+                            label: "140mm",
+                        },
+                    ]}
                 />
                 <span>Headtube Angle</span>
                 <Slider
@@ -92,10 +112,20 @@ export default function Home() {
                     defaultValue={state.angleHt}
                     value={state.angleHt}
                     aria-label="Default"
-                    valueLabelDisplay="auto"
+                    valueLabelDisplay="on"
                     onChange={(event, value) =>
                         setState({ slider: event.target.name, value: value })
                     }
+                    marks={[
+                        {
+                            value: 65,
+                            label: <>65&deg;</>,
+                        },
+                        {
+                            value: 85,
+                            label: <>85&deg;</>,
+                        },
+                    ]}
                 />
                 <span>Stem Angle</span>
                 <Slider
@@ -105,10 +135,20 @@ export default function Home() {
                     defaultValue={state.angleStem}
                     value={state.angleStem}
                     aria-label="Default"
-                    valueLabelDisplay="auto"
+                    valueLabelDisplay="on"
                     onChange={(event, value) =>
                         setState({ slider: event.target.name, value: value })
                     }
+                    marks={[
+                        {
+                            value: -30,
+                            label: <>-30&deg;</>,
+                        },
+                        {
+                            value: 30,
+                            label: <>30&deg;</>,
+                        },
+                    ]}
                 />
             </div>
             <svg
