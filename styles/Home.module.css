@@ -1,4 +1,38 @@
-.container {
+.gridlayout {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  font-family: "Verdana";
+  gap: 20px;
+}
+
+.intro {
+  grid-row: 1 / span 1;
+  grid-column: 2 / span 12;
+}
+
+.sliderContainer {
+  grid-row: 2 / span 1;
+  grid-column: 2 / span 3;
+}
+
+
+.riserun {
+  grid-row: 2 / span 1;
+  grid-column: 6 / span 2;
+}
+
+.drawing {
+  grid-row: 2 / span 2;
+  grid-column: 6 / span 3;
+}
+
+.slider {
+  margin-top: 30px;
+  height: 80px;
+}
+
+/* .container {
   min-height: 100vh;
   padding: 0 0.5rem;
   display: flex;
@@ -118,9 +152,7 @@
     width: 100%;
     flex-direction: column;
   }
-}
+} */
 
-.slider {
-  height: 40px;
-  width: 300px;
-}
+
+
