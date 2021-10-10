@@ -209,8 +209,12 @@ export default function Home() {
                             name="stack"
                             style={{ width: 100 }}
                             helperText="stack"
-                            type="number"
-                            inputmode="decimal"
+                            // type="text"
+                            inputProps={{
+                                type: "text",
+                                inputMode: "numeric",
+                                pattern: "[0-9]*",
+                            }}
                             value={state.stack}
                             onChange={(event) =>
                                 setState({
@@ -224,8 +228,12 @@ export default function Home() {
                             name="reach"
                             style={{ width: 100 }}
                             helperText="reach"
-                            type="number"
-                            inputmode="decimal"
+                            // type="text"
+                            inputProps={{
+                                type: "text",
+                                inputMode: "numeric",
+                                pattern: "[0-9]*",
+                            }}
                             value={state.reach}
                             onChange={(event) =>
                                 setState({
