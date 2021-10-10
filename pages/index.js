@@ -210,6 +210,7 @@ export default function Home() {
                             style={{ width: 100 }}
                             helperText="stack"
                             type="number"
+                            inputmode="decimal"
                             value={state.stack}
                             onChange={(event) =>
                                 setState({
@@ -224,6 +225,7 @@ export default function Home() {
                             style={{ width: 100 }}
                             helperText="reach"
                             type="number"
+                            inputmode="decimal"
                             value={state.reach}
                             onChange={(event) =>
                                 setState({
