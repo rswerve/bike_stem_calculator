@@ -1,12 +1,13 @@
 import { useReducer } from "react";
-import { Slider, Typography, TextField } from "@mui/material";
+import { Link, Slider, Tooltip, TextField, Typography } from "@mui/material";
+import InfoIcon from "@mui/icons-material/Info";
 import styles from "../styles/Home.module.css";
 
 const initialState = {
-    stemXOrigin: 200,
-    stemYOrigin: 240,
+    stemXOrigin: 100,
+    stemYOrigin: 250,
     spacer: 40,
-    stem: 110,
+    stem: 100,
     angleHt: 73,
     angleStem: 0,
     stack: "",
@@ -43,15 +44,128 @@ export default function Home() {
     const spacerRun = state.spacer * Math.sin(getRadians(90 - state.angleHt));
     const stemRise = state.stem * Math.sin(getRadians(state.angleStem));
     const stemRun = state.stem * Math.sin(getRadians(90 - state.angleStem));
+    const totalRise = spacerRise + stemRise;
+    const totalRun = stemRun - spacerRun;
+    const stackDiff = () => {
+        if (
+            state.handlebarStack === "" ||
+            state.handlebarStack === 0 ||
+            state.stack === "" ||
+            state.stack === 0 ||
+            spacerRise === "" ||
+            stemRise === ""
+        ) {
+            return;
+        }
+        return Math.round(
+            state.handlebarStack - (state.stack + spacerRise + stemRise)
+        );
+    };
+    const stackMessage = () => {
+        if (stackDiff() == null) {
+            return;
+        }
+        const diffNote =
+            stackDiff() !== 0
+                ? stackDiff() < 0
+                    ? "TOO TALL"
+                    : "TOO SHORT"
+                : "JUST RIGHT";
+        return diffNote === "JUST RIGHT"
+            ? `Stack is ${diffNote}`
+            : `Stack is ${diffNote} by ${Math.abs(stackDiff())}mm`;
+    };
+    const reachDiff = () => {
+        if (
+            state.handlebarReach === "" ||
+            state.handlebarReach === 0 ||
+            state.reach === "" ||
+            state.reach === 0 ||
+            spacerRun === "" ||
+            stemRun === ""
+        ) {
+            return;
+        }
+        return Math.round(
+            state.handlebarReach - (state.reach + stemRun - spacerRun)
+        );
+    };
+    const reachMessage = () => {
+        if (reachDiff() == null) {
+            return;
+        }
+        const diffNote =
+            reachDiff() !== 0
+                ? reachDiff() < 0
+                    ? "TOO LONG"
+                    : "TOO SHORT"
+                : "JUST RIGHT";
+        return diffNote === "JUST RIGHT"
+            ? `Reach is ${diffNote}`
+            : `Reach is ${diffNote} by ${Math.abs(reachDiff())}mm`;
+    };
+
+    const fitTooltip = (
+        <>
+            <Typography variant="body1">
+                HY and HX are measured from the bottom bracket to the center of
+                the handlebars.{" "}
+                {
+                    <a
+                        href="https://web.archive.org/web/20200809061637/https://www.slowtwitch.com/Bike_Fit/The_Secret_Weapon_of_Superstar_Fitters_HX_6335.html"
+                        target="_blank"
+                        rel="noreferrer"
+                    >
+                        <u>This article</u>
+                    </a>
+                }{" "}
+                is a good explanation of the importance of these measurements,
+                which you should get from your fitter.
+            </Typography>
+        </>
+    );
+    const spacerTooltip = (
+        <Typography variant="body1">
+            Be sure to include everything between the headset and the handlebar
+            clamp--like the headset top cap--in addition to the spacers. Also
+            note that bikes with carbon steerers are recommended not to exceed
+            about 40mm in spacers.
+        </Typography>
+    );
+    const stemAngleTooltip = (
+        <Typography variant="body1">
+            Measured from the horizontal, not relative to the headtube angle
+        </Typography>
+    );
+    const spacerLabel = (
+        <Tooltip title={spacerTooltip} leaveTouchDelay={10000}>
+            <Typography sx={{ fontSize: "0.875rem", fontWeight: "regular" }}>
+                Spacer height{" "}
+                <InfoIcon fontSize="small" sx={{ color: "orange" }} />
+            </Typography>
+        </Tooltip>
+    );
+    const stemAngleLabel = (
+        <Tooltip title={stemAngleTooltip} leaveTouchDelay={10000}>
+            <Typography sx={{ fontSize: "0.875rem" }}>
+                Stem angle{" "}
+                <InfoIcon fontSize="small" sx={{ color: "orange" }} />
+            </Typography>
+        </Tooltip>
+    );
 
     return (
         <>
+            {/* <header className={styles.header}> */}
+            <Typography variant="h4" color="blue" mt={1} ml={1}>
+                Bicycle Stem & Fit Calculator
+            </Typography>
+            {/* </header> */}
             <div className={styles.gridlayout}>
                 <div className={styles.intro}>
                     <Typography variant="body" paragraph>
-                        {`This is road bike stem calculator that can also help
-                        translate measurements from a bike fitting to a given
-                        frame's stack and reach.`}
+                        {`This is a road bike stem calculator that can also help
+                        translate measurements between a frame and a fitting.`}
                     </Typography>
                     <Typography variant="body" paragraph>
                         {`If you have frame and fit
@@ -102,7 +216,15 @@ export default function Home() {
                     </div>
                 </div>
                 <div className={styles.fit}>
-                    <Typography variant="h6">Fit</Typography>
+                    <Tooltip title={fitTooltip} leaveTouchDelay={10000}>
+                        <Typography variant="h6">
+                            Fit{" "}
+                            <InfoIcon
+                                fontSize="small"
+                                sx={{ color: "orange" }}
+                            />
+                        </Typography>
+                    </Tooltip>
                     <div id="handlebar_x_y">
                         <TextField
                             id="handlebar_stack"
@@ -141,23 +263,24 @@ export default function Home() {
                             }
                         />
                     </div>
-                    <Typography>
-                        Stack diff:{" "}
-                        {Math.round(
-                            state.handlebarStack -
-                                (state.stack + spacerRise + stemRise)
-                        )}
-                    </Typography>
-                    <Typography>
-                        Reach diff:{" "}
-                        {Math.round(
-                            state.handlebarReach -
-                                (state.reach + stemRun - spacerRun)
-                        )}
-                    </Typography>
+                </div>
+                <div className={styles.diff}>
+                    <Typography>{stackMessage() ?? ""}</Typography>
+                    <Typography>{reachMessage() ?? ""}</Typography>
+                    <hr />
                 </div>
                 <div className={styles.sliderContainer}>
-                    <Typography variant="h6">Stem</Typography>
+                    <Typography variant="h5">Stem</Typography>
+                    <div className={styles.riserun}>
+                        <Typography>
+                            {totalRise < 0 ? "Drop: " : "Rise: "}
+                            {Math.round(Math.abs(spacerRise + stemRise))}mm
+                            {/* Rise: {`${Math.round(spacerRise + stemRise)}mm`} */}
+                        </Typography>
+                        <Typography>
+                            Run: {`${Math.round(stemRun - spacerRun)}mm`}
+                        </Typography>
+                    </div>
                     <div className={styles.slider}>
                         <Slider
                             name="spacer"
@@ -180,7 +303,7 @@ export default function Home() {
                                 },
                                 {
                                     value: 40,
-                                    label: "Spacer Height",
+                                    label: spacerLabel,
                                 },
                                 {
                                     value: 80,
@@ -195,6 +318,7 @@ export default function Home() {
                             name="stem"
                             min={70}
                             max={140}
+                            step={10}
                             defaultValue={state.stem}
                             value={state.stem}
                             aria-label="Default"
@@ -277,7 +401,7 @@ export default function Home() {
                                 },
                                 {
                                     value: 0,
-                                    label: "Stem Angle",
+                                    label: stemAngleLabel,
                                 },
                                 {
                                     value: 60,
@@ -287,18 +411,6 @@ export default function Home() {
                         />
                     </div>
                 </div>
-                <div className={styles.riserun}>
-                    <div>
-                        <div>Rise: {Math.round(spacerRise + stemRise)}</div>
-                        {/* note subtraction */}
-                        <div>Run: {Math.round(stemRun - spacerRun)} </div>
-                        <div>Spacer Rise: {Math.round(spacerRise)}</div>
-                        <div>Spacer Run:{-Math.round(spacerRun)}</div>
-                        <div>Stem Rise:{Math.round(stemRise)}</div>
-                        <div>Stem Run:{Math.round(stemRun)}</div>
-                    </div>
-                </div>
-
                 <div className={styles.drawing}>
                     <svg
                         width="400"

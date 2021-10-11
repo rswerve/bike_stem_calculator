@@ -1,41 +1,50 @@
 .gridlayout {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 300px));
-  grid-template-rows: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(5, minmax(150px, 200px));
+  grid-template-rows: repeat(autofit, minmax(150px, 1fr));
   font-family: "Verdana";
+  margin-left: 50px;
   gap: 20px;
+}
+
+.header {
+  margin-top: 10px;
+  margin-left: 10px;
 }
 
 .intro {
   margin-top: 10px;
   grid-row: 1 / span 1;
-  grid-column: 2 / span 4;
+  grid-column: 1 / span 3;
 }
 
 .frame {
   grid-row: 2 / span 1;
-  grid-column: 2 / span 1;
+  grid-column: 1 / span 1;
 }
 
 .fit {
   grid-row: 2 / span 1;
-  grid-column: 3 / span 1;
+  grid-column: 2 / span 1;
+}
+
+.diff {
+  grid-row: 3 / span 1;
+  grid-column: 1 / span 2;
 }
 
 .sliderContainer {
-  grid-row: 3 / span 1;
-  grid-column: 2 / span 2;
+  grid-row: 4 / span 1;
+  grid-column: 1 / span 2;
 }
 
-
 .riserun {
-  grid-row: 2 / span 1;
-  grid-column: 4 / span 2;
+  margin: 5px 0px 70px 0px;
 }
 
 .drawing {
-  grid-row: 3 / span 1;
-  grid-column: 4 / span 1;
+  grid-row: 4 / span 1;
+  grid-column: 3 / span 1;
 }
 
 .slider {
