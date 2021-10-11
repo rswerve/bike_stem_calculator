@@ -1,11 +1,5 @@
 import { useReducer } from "react";
-import {
-    FormControlLabel,
-    Switch,
-    Slider,
-    Typography,
-    TextField,
-} from "@mui/material";
+import { Slider, Typography, TextField } from "@mui/material";
 import styles from "../styles/Home.module.css";
 
 const initialState = {
@@ -15,16 +9,14 @@ const initialState = {
     stem: 110,
     angleHt: 73,
     angleStem: 0,
-    stack: 600,
-    reach: 375,
-    handlebarStack: 700,
-    handlebarReach: 475,
+    stack: "",
+    reach: "",
+    handlebarStack: "",
+    handlebarReach: "",
     saddleHeight: 750,
     saddleSetback: 60,
     handlebarDrop: 40,
     saddleReach: 550,
-    handlebarFit: true,
-    complexFit: false,
 };
 
 const getRadians = (angleDegrees) => {
@@ -32,23 +24,9 @@ const getRadians = (angleDegrees) => {
 };
 
 const reducer = (state, action) => {
-    console.log("state: ", state);
-    console.log("action: ", action);
+    // console.log("state: ", state);
+    // console.log("action: ", action);
     return { ...state, ...action, [action.input]: action.value };
-    // switch (action.input) {
-    //     case "spacer":
-    //         return { ...state, ...action, [action.input]: action.value };
-    //     case "stem":
-    //         return { ...state, ...action, stem: action.value };
-    //     case "angleHt":
-    //         return { ...state, ...action, angleHt: action.value };
-    //     case "angleStem":
-    //         return { ...state, ...action, angleStem: action.value };
-    //     case "stack":
-    //         return { ...state, ...action, stack: action.value };
-    //     case "stack":
-    //         return { ...state, ...action, reach: action.value };
-    // }
 };
 
 export default function Home() {
@@ -70,7 +48,113 @@ export default function Home() {
         <>
             <div className={styles.gridlayout}>
                 <div className={styles.intro}>
-                    <Typography>This is how you use it.</Typography>
+                    <Typography variant="body" paragraph>
+                        {`This is road bike stem calculator that can also help
+                        translate measurements from a bike fitting to a given
+                        frame's stack and reach.`}
+                    </Typography>
+                    <Typography variant="body" paragraph>
+                        {`If you have frame and fit
+                        numbers, enter them below and adjust the sliders to find
+                        a workable configuration. Or you can just use the
+                        sliders as a simple stem calculator.`}
+                    </Typography>
+                </div>
+                <div className={styles.frame}>
+                    <Typography variant="h6">Frame</Typography>
+                    <div id="frame">
+                        <TextField
+                            id="stack"
+                            name="stack"
+                            style={{ width: 100 }}
+                            helperText="Stack"
+                            inputProps={{
+                                type: "text",
+                                inputMode: "numeric",
+                                pattern: "[0-9]*",
+                            }}
+                            value={state.stack}
+                            onChange={(event) =>
+                                setState({
+                                    input: event.target.name,
+                                    value: Number(event.target.value),
+                                })
+                            }
+                        />
+                        <TextField
+                            id="reach"
+                            name="reach"
+                            style={{ width: 100 }}
+                            helperText="Reach"
+                            inputProps={{
+                                type: "text",
+                                inputMode: "numeric",
+                                pattern: "[0-9]*",
+                            }}
+                            value={state.reach}
+                            onChange={(event) =>
+                                setState({
+                                    input: event.target.name,
+                                    value: Number(event.target.value),
+                                })
+                            }
+                        />
+                    </div>
+                </div>
+                <div className={styles.fit}>
+                    <Typography variant="h6">Fit</Typography>
+                    <div id="handlebar_x_y">
+                        <TextField
+                            id="handlebar_stack"
+                            name="handlebarStack"
+                            style={{ width: 100 }}
+                            helperText="HY"
+                            inputProps={{
+                                type: "text",
+                                inputMode: "numeric",
+                                pattern: "[0-9]*",
+                            }}
+                            value={state.handlebarStack}
+                            onChange={(event) =>
+                                setState({
+                                    input: event.target.name,
+                                    value: Number(event.target.value),
+                                })
+                            }
+                        />
+                        <TextField
+                            id="handlebar_reach"
+                            name="handlebarReach"
+                            style={{ width: 100 }}
+                            helperText="HX"
+                            inputProps={{
+                                type: "text",
+                                inputMode: "numeric",
+                                pattern: "[0-9]*",
+                            }}
+                            value={state.handlebarReach}
+                            onChange={(event) =>
+                                setState({
+                                    input: event.target.name,
+                                    value: Number(event.target.value),
+                                })
+                            }
+                        />
+                    </div>
+                    <Typography>
+                        Stack diff:{" "}
+                        {Math.round(
+                            state.handlebarStack -
+                                (state.stack + spacerRise + stemRise)
+                        )}
+                    </Typography>
+                    <Typography>
+                        Reach diff:{" "}
+                        {Math.round(
+                            state.handlebarReach -
+                                (state.reach + stemRun - spacerRun)
+                        )}
+                    </Typography>
                 </div>
                 <div className={styles.sliderContainer}>
                     <Typography variant="h6">Stem</Typography>
@@ -174,8 +258,8 @@ export default function Home() {
                     <div className={styles.slider}>
                         <Slider
                             name="angleStem"
-                            min={-30}
-                            max={30}
+                            min={-60}
+                            max={60}
                             defaultValue={state.angleStem}
                             value={state.angleStem}
                             aria-label="Default"
@@ -188,107 +272,23 @@ export default function Home() {
                             }
                             marks={[
                                 {
-                                    value: -30,
-                                    label: <>-30&deg;</>,
+                                    value: -60,
+                                    label: <>-60&deg;</>,
                                 },
                                 {
                                     value: 0,
                                     label: "Stem Angle",
                                 },
                                 {
-                                    value: 30,
-                                    label: <>30&deg;</>,
+                                    value: 60,
+                                    label: <>60&deg;</>,
                                 },
                             ]}
                         />
                     </div>
-                    <Typography variant="h6">Frame</Typography>
-                    <div id="frame">
-                        <TextField
-                            id="stack"
-                            name="stack"
-                            style={{ width: 100 }}
-                            helperText="stack"
-                            // type="text"
-                            inputProps={{
-                                type: "text",
-                                inputMode: "numeric",
-                                pattern: "[0-9]*",
-                            }}
-                            value={state.stack}
-                            onChange={(event) =>
-                                setState({
-                                    input: event.target.name,
-                                    value: event.target.value,
-                                })
-                            }
-                        />
-                        <TextField
-                            id="reach"
-                            name="reach"
-                            style={{ width: 100 }}
-                            helperText="reach"
-                            // type="text"
-                            inputProps={{
-                                type: "text",
-                                inputMode: "numeric",
-                                pattern: "[0-9]*",
-                            }}
-                            value={state.reach}
-                            onChange={(event) =>
-                                setState({
-                                    input: event.target.name,
-                                    value: event.target.value,
-                                })
-                            }
-                        />
-                    </div>
-                    <Typography variant="h6">Fit</Typography>
-                    <FormControlLabel
-                        control={<Switch defaultChecked />}
-                        checked={state.handlebarFit}
-                        label="Handlebar XY"
-                    />
-                    <div id="handlebar_x_y">
-                        <TextField
-                            id="handlebar_stack"
-                            style={{ width: 100 }}
-                            helperText="handlebar stack"
-                            type="number"
-                            value={5}
-                        />
-                        <TextField
-                            id="handlebar_reach"
-                            style={{ width: 100 }}
-                            helperText="handlebar reach"
-                            type="number"
-                            value={6}
-                        />
-                    </div>
-                    <FormControlLabel
-                        control={<Switch defaultChecked />}
-                        checked={state.complexFit}
-                        label="Saddle Reach"
-                    />
-                    <div id="handlebar_x_y">
-                        <TextField
-                            id="handlebar_stack"
-                            style={{ width: 100 }}
-                            helperText="handlebar stack"
-                            type="number"
-                            value={5}
-                        />
-                        <TextField
-                            id="handlebar_reach"
-                            style={{ width: 100 }}
-                            helperText="handlebar reach"
-                            type="number"
-                            value={6}
-                        />
-                    </div>
                 </div>
                 <div className={styles.riserun}>
-                    <Typography>
+                    <div>
                         <div>Rise: {Math.round(spacerRise + stemRise)}</div>
                         {/* note subtraction */}
                         <div>Run: {Math.round(stemRun - spacerRun)} </div>
@@ -296,7 +296,7 @@ export default function Home() {
                         <div>Spacer Run:{-Math.round(spacerRun)}</div>
                         <div>Stem Rise:{Math.round(stemRise)}</div>
                         <div>Stem Run:{Math.round(stemRun)}</div>
-                    </Typography>
+                    </div>
                 </div>
 
                 <div className={styles.drawing}>
