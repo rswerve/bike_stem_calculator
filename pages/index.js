@@ -197,7 +197,7 @@ export default function Home() {
                             helperText={
                                 inputError === "stack"
                                     ? "Numbers only"
-                                    : "Stack"
+                                    : "Stack (mm)"
                             }
                             inputProps={{
                                 type: "text",
@@ -222,7 +222,7 @@ export default function Home() {
                             helperText={
                                 inputError === "reach"
                                     ? "Numbers only"
-                                    : "Reach"
+                                    : "Reach (mm)"
                             }
                             onChange={(event) => validateNumbers(event)}
                         />
@@ -256,7 +256,7 @@ export default function Home() {
                             helperText={
                                 inputError === "handlebarStack"
                                     ? "Numbers only"
-                                    : "HY"
+                                    : "HY (mm)"
                             }
                             onChange={(event) => validateNumbers(event)}
                         />
@@ -277,7 +277,7 @@ export default function Home() {
                             helperText={
                                 inputError === "handlebarReach"
                                     ? "Numbers only"
-                                    : "HX"
+                                    : "HX (mm)"
                             }
                             onChange={(event) => validateNumbers(event)}
                         />
