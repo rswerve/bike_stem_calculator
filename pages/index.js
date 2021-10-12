@@ -6,7 +6,7 @@ import styles from "../styles/Home.module.css";
 
 const initialState = {
     stemXOrigin: 100,
-    stemYOrigin: 250,
+    stemYOrigin: 200,
     spacer: 40,
     stem: 100,
     angleHt: 73,
@@ -26,8 +26,6 @@ const getRadians = (angleDegrees) => {
 };
 
 const reducer = (state, action) => {
-    // console.log("state: ", state);
-    // console.log("action: ", action);
     return { ...state, ...action, [action.input]: action.value };
 };
 
@@ -41,11 +39,9 @@ export default function Home() {
             setInputError(null);
             setState({
                 input: event.target.name,
-                value: event.target.value,
+                value: Number(event.target.value),
             });
         }
-        // console.log("input event: ", event.target.validity.patternMismatch);
-        // return false;
     };
     const flippedHeadtubeAngle = 90 + (90 - state.angleHt);
     const stemAngle = 180 - state.angleStem;
@@ -134,8 +130,7 @@ export default function Home() {
                         <u>This article</u>
                     </a>
                 }{" "}
-                is a good explanation of the importance of these measurements,
-                which you should get from your fitter.
+                is a good explanation of the importance of these measurements.
             </Typography>
         </>
     );
@@ -178,15 +173,16 @@ export default function Home() {
             {/* </header> */}
             <div className={styles.gridlayout}>
                 <div className={styles.intro}>
-                    <Typography variant="body" paragraph>
-                        {`This is a road bike stem calculator that can also help
-                        translate measurements between a frame and a fitting.`}
+                    <Typography variant="body1" paragraph>
+                        This is a road bike stem calculator that can also help
+                        translate measurements between a frame and a fitting.
                     </Typography>
-                    <Typography variant="body" paragraph>
-                        {`If you have frame and fit
-                        numbers, enter them below and adjust the sliders to find
-                        a workable configuration. Or you can just use the
-                        sliders as a simple stem calculator.`}
+                    <Typography variant="body1" paragraph>
+                        If you have frame and fit numbers, enter them below and
+                        adjust the sliders to see if a workable configuration is
+                        available. You want the sum of the frame and the stem to
+                        be as close as possible to HX and HY. Or you can just
+                        use the sliders as a simple stem calculator.
                     </Typography>
                 </div>
                 <div className={styles.frame}>
@@ -296,12 +292,11 @@ export default function Home() {
                     <Typography variant="h5">Stem</Typography>
                     <div className={styles.riserun}>
                         <Typography>
-                            {totalRise < 0 ? "Drop: " : "Rise: "}
+                            {totalRise < 0 ? "- Stack: " : "+ Stack: "}
                             {Math.round(Math.abs(spacerRise + stemRise))}mm
-                            {/* Rise: {`${Math.round(spacerRise + stemRise)}mm`} */}
                         </Typography>
                         <Typography>
-                            Run: {`${Math.round(totalRun)}mm`}
+                            + Reach: {`${Math.round(totalRun)}mm`}
                         </Typography>
                     </div>
                     <div className={styles.slider}>
@@ -436,8 +431,8 @@ export default function Home() {
                 </div>
                 <div className={styles.drawing}>
                     <svg
-                        width="400"
-                        height="500"
+                        width="250"
+                        height="325"
                         version="1.1"
                         xmlns="http://www.w3.org/2000/svg"
                     >
