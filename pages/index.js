@@ -1,6 +1,7 @@
-import { useReducer } from "react";
+import { useReducer, useState } from "react";
 import { Link, Slider, Tooltip, TextField, Typography } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
+import Image from "next/image";
 import styles from "../styles/Home.module.css";
 
 const initialState = {
@@ -32,6 +33,20 @@ const reducer = (state, action) => {
 
 export default function Home() {
     const [state, setState] = useReducer(reducer, initialState);
+    const [inputError, setInputError] = useState(null);
+    const validateNumbers = (event) => {
+        if (event.target.validity.patternMismatch) {
+            setInputError(event.target.name);
+        } else {
+            setInputError(null);
+            setState({
+                input: event.target.name,
+                value: event.target.value,
+            });
+        }
+        // console.log("input event: ", event.target.validity.patternMismatch);
+        // return false;
+    };
     const flippedHeadtubeAngle = 90 + (90 - state.angleHt);
     const stemAngle = 180 - state.angleStem;
     const topOfHTX =
@@ -126,10 +141,10 @@ export default function Home() {
     );
     const spacerTooltip = (
         <Typography variant="body1">
-            Be sure to include everything between the headset and the handlebar
-            clamp--like the headset top cap--in addition to the spacers. Also
-            note that bikes with carbon steerers are recommended not to exceed
-            about 40mm in spacers.
+            Include everything between the headset and the handlebar clamp--like
+            the headset top cap--in addition to the spacers. Note that bikes
+            with carbon steerers are recommended not to exceed about 40mm in
+            spacers.
         </Typography>
     );
     const stemAngleTooltip = (
@@ -178,40 +193,42 @@ export default function Home() {
                     <Typography variant="h6">Frame</Typography>
                     <div id="frame">
                         <TextField
+                            disabled={inputError && inputError !== "stack"}
+                            error={inputError === "stack"}
                             id="stack"
                             name="stack"
                             style={{ width: 100 }}
-                            helperText="Stack"
+                            helperText={
+                                inputError === "stack"
+                                    ? "Numbers only"
+                                    : "Stack"
+                            }
                             inputProps={{
                                 type: "text",
                                 inputMode: "numeric",
                                 pattern: "[0-9]*",
                             }}
                             value={state.stack}
-                            onChange={(event) =>
-                                setState({
-                                    input: event.target.name,
-                                    value: Number(event.target.value),
-                                })
-                            }
+                            onChange={(event) => validateNumbers(event)}
                         />
                         <TextField
                             id="reach"
                             name="reach"
                             style={{ width: 100 }}
-                            helperText="Reach"
                             inputProps={{
                                 type: "text",
                                 inputMode: "numeric",
                                 pattern: "[0-9]*",
                             }}
                             value={state.reach}
-                            onChange={(event) =>
-                                setState({
-                                    input: event.target.name,
-                                    value: Number(event.target.value),
-                                })
+                            disabled={inputError && inputError !== "reach"}
+                            error={inputError === "reach"}
+                            helperText={
+                                inputError === "reach"
+                                    ? "Numbers only"
+                                    : "Reach"
                             }
+                            onChange={(event) => validateNumbers(event)}
                         />
                     </div>
                 </div>
@@ -230,37 +247,43 @@ export default function Home() {
                             id="handlebar_stack"
                             name="handlebarStack"
                             style={{ width: 100 }}
-                            helperText="HY"
                             inputProps={{
                                 type: "text",
                                 inputMode: "numeric",
                                 pattern: "[0-9]*",
                             }}
                             value={state.handlebarStack}
-                            onChange={(event) =>
-                                setState({
-                                    input: event.target.name,
-                                    value: Number(event.target.value),
-                                })
+                            disabled={
+                                inputError && inputError !== "handlebarStack"
                             }
+                            error={inputError === "handlebarStack"}
+                            helperText={
+                                inputError === "handlebarStack"
+                                    ? "Numbers only"
+                                    : "HY"
+                            }
+                            onChange={(event) => validateNumbers(event)}
                         />
                         <TextField
                             id="handlebar_reach"
                             name="handlebarReach"
                             style={{ width: 100 }}
-                            helperText="HX"
                             inputProps={{
                                 type: "text",
                                 inputMode: "numeric",
                                 pattern: "[0-9]*",
                             }}
                             value={state.handlebarReach}
-                            onChange={(event) =>
-                                setState({
-                                    input: event.target.name,
-                                    value: Number(event.target.value),
-                                })
+                            disabled={
+                                inputError && inputError !== "handlebarReach"
                             }
+                            error={inputError === "handlebarReach"}
+                            helperText={
+                                inputError === "handlebarReach"
+                                    ? "Numbers only"
+                                    : "HX"
+                            }
+                            onChange={(event) => validateNumbers(event)}
                         />
                     </div>
                 </div>
@@ -278,7 +301,7 @@ export default function Home() {
                             {/* Rise: {`${Math.round(spacerRise + stemRise)}mm`} */}
                         </Typography>
                         <Typography>
-                            Run: {`${Math.round(stemRun - spacerRun)}mm`}
+                            Run: {`${Math.round(totalRun)}mm`}
                         </Typography>
                     </div>
                     <div className={styles.slider}>
@@ -453,6 +476,16 @@ export default function Home() {
                     </svg>
                 </div>
             </div>
+            <footer>
+                <Typography variant="body2" mt={5} mb={1} ml={1}>
+                    For suggestions or bug reports, please send an email to
+                    rswerve@gmail.com or{" "}
+                    <Link href="https://github.com/rswerve/bike_stem_calculator/issues/new/choose">
+                        open an issue
+                    </Link>{" "}
+                    on Github.
+                </Typography>
+            </footer>
         </>
     );
 }
