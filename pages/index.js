@@ -1,7 +1,6 @@
 import { useReducer, useState } from "react";
 import { Link, Slider, Tooltip, TextField, Typography } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
-import Image from "next/image";
 import styles from "../styles/Home.module.css";
 
 const initialState = {
@@ -166,7 +165,7 @@ export default function Home() {
 
     return (
         <>
-            {/* <header className={styles.header}> */}
+            <title>Bicycle Stem & Fit Calculator</title>
             <Typography variant="h4" color="blue" mt={1} ml={1}>
                 Bicycle Stem & Fit Calculator
             </Typography>
@@ -203,6 +202,7 @@ export default function Home() {
                                 type: "text",
                                 inputMode: "numeric",
                                 pattern: "[0-9]*",
+                                "aria-label": "stack",
                             }}
                             value={state.stack}
                             onChange={(event) => validateNumbers(event)}
@@ -215,6 +215,7 @@ export default function Home() {
                                 type: "text",
                                 inputMode: "numeric",
                                 pattern: "[0-9]*",
+                                "aria-label": "reach",
                             }}
                             value={state.reach}
                             disabled={inputError && inputError !== "reach"}
@@ -247,6 +248,7 @@ export default function Home() {
                                 type: "text",
                                 inputMode: "numeric",
                                 pattern: "[0-9]*",
+                                "aria-label": "handlebar_stack",
                             }}
                             value={state.handlebarStack}
                             disabled={
@@ -268,6 +270,7 @@ export default function Home() {
                                 type: "text",
                                 inputMode: "numeric",
                                 pattern: "[0-9]*",
+                                "aria-label": "handlebar_reach",
                             }}
                             value={state.handlebarReach}
                             disabled={
@@ -306,7 +309,7 @@ export default function Home() {
                             max={80}
                             defaultValue={state.spacer}
                             value={state.spacer}
-                            aria-label="Default"
+                            aria-label="spacer_slider"
                             valueLabelDisplay="on"
                             onChange={(event, value) =>
                                 setState({
@@ -339,7 +342,7 @@ export default function Home() {
                             step={10}
                             defaultValue={state.stem}
                             value={state.stem}
-                            aria-label="Default"
+                            aria-label="stem_slider"
                             valueLabelDisplay="on"
                             onChange={(event, value) =>
                                 setState({
@@ -372,7 +375,7 @@ export default function Home() {
                             step={0.25}
                             defaultValue={state.angleHt}
                             value={state.angleHt}
-                            aria-label="Default"
+                            aria-label="angleht_slider"
                             valueLabelDisplay="on"
                             onChange={(event, value) =>
                                 setState({
@@ -404,7 +407,7 @@ export default function Home() {
                             max={60}
                             defaultValue={state.angleStem}
                             value={state.angleStem}
-                            aria-label="Default"
+                            aria-label="anglestem_slider"
                             valueLabelDisplay="on"
                             onChange={(event, value) =>
                                 setState({
