@@ -1,5 +1,5 @@
 import React from "react";
-import Index from "./index";
+import Index from "../../pages/index";
 import { render, fireEvent, waitFor, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
