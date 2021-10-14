@@ -1,9 +1,9 @@
 import { useEffect, useReducer, useState } from "react";
 import { useQueryState } from "next-usequerystate";
-
 import { Link, Slider, Tooltip, TextField, Typography } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 import styles from "../styles/Home.module.css";
+import useDebounce from "./useDebounce";
 
 const initialState = {
     stemXOrigin: 100,
@@ -32,6 +32,7 @@ export default function Home() {
     });
     const loadState = inurl || initialState;
     const [state, setState] = useReducer(reducer, loadState);
+    const debouncedState = useDebounce(state, 250);
     const [inputError, setInputError] = useState(null);
     const validateNumbers = (event) => {
         if (event.target.validity.patternMismatch) {
@@ -45,8 +46,8 @@ export default function Home() {
         }
     };
     useEffect(() => {
-        setinurl(JSON.stringify(state));
-    }, [state, setinurl]);
+        setinurl(JSON.stringify(debouncedState));
+    }, [debouncedState, setinurl]);
     const flippedHeadtubeAngle = 90 + (90 - state.angleHt);
     const stemAngle = 180 - state.angleStem;
     const topOfHTX =
@@ -187,6 +188,9 @@ export default function Home() {
                         available. You want the sum of the frame and the stem to
                         be as close as possible to HX and HY. Or you can just
                         use the sliders as a simple stem calculator.
+                    </Typography>
+                    <Typography variant="body1" paragraph>
+                        To save your work, simply bookmark the page.
                     </Typography>
                 </div>
                 <div className={styles.frame}>
