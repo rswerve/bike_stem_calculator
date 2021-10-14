@@ -14,10 +14,6 @@ const initialState = {
     reach: "",
     handlebarStack: "",
     handlebarReach: "",
-    saddleHeight: 750,
-    saddleSetback: 60,
-    handlebarDrop: 40,
-    saddleReach: 550,
 };
 
 const getRadians = (angleDegrees) => {
