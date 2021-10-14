@@ -170,329 +170,335 @@ export default function Home() {
     );
 
     return (
-        <>
-            <title>Bicycle Stem & Fit Calculator</title>
-            <Typography variant="h4" color="blue" mt={1} ml={1}>
-                Bicycle Stem & Fit Calculator
-            </Typography>
-            {/* </header> */}
-            <div className={styles.gridlayout}>
-                <div className={styles.intro}>
-                    <Typography variant="body1" paragraph>
-                        This is a road bike stem calculator that can also help
-                        translate measurements between a frame and a fitting.
-                    </Typography>
-                    <Typography variant="body1" paragraph>
-                        If you have frame and fit numbers, enter them below and
-                        adjust the sliders to see if a workable configuration is
-                        available. You want the sum of the frame and the stem to
-                        be as close as possible to HX and HY. Or you can just
-                        use the sliders as a simple stem calculator.
-                    </Typography>
-                    <Typography variant="body1" paragraph>
-                        To save your work, simply bookmark the page.
-                    </Typography>
-                </div>
-                <div className={styles.frame}>
-                    <Typography variant="h6">Frame</Typography>
-                    <div id="frame">
-                        <TextField
-                            disabled={inputError && inputError !== "stack"}
-                            error={inputError === "stack"}
-                            id="stack"
-                            name="stack"
-                            style={{ width: 100 }}
-                            helperText={
-                                inputError === "stack"
-                                    ? "Numbers only"
-                                    : "Stack (mm)"
-                            }
-                            inputProps={{
-                                type: "text",
-                                inputMode: "numeric",
-                                pattern: "[0-9]*",
-                                "aria-label": "stack",
-                            }}
-                            value={state.stack}
-                            onChange={(event) => validateNumbers(event)}
-                        />
-                        <TextField
-                            id="reach"
-                            name="reach"
-                            style={{ width: 100 }}
-                            inputProps={{
-                                type: "text",
-                                inputMode: "numeric",
-                                pattern: "[0-9]*",
-                                "aria-label": "reach",
-                            }}
-                            value={state.reach}
-                            disabled={inputError && inputError !== "reach"}
-                            error={inputError === "reach"}
-                            helperText={
-                                inputError === "reach"
-                                    ? "Numbers only"
-                                    : "Reach (mm)"
-                            }
-                            onChange={(event) => validateNumbers(event)}
-                        />
-                    </div>
-                </div>
-                <div className={styles.fit}>
-                    <Tooltip title={fitTooltip} leaveTouchDelay={10000}>
-                        <Typography variant="h6">
-                            Fit{" "}
-                            <InfoIcon
-                                fontSize="small"
-                                sx={{ color: "orange" }}
-                            />
-                        </Typography>
-                    </Tooltip>
-                    <div id="handlebar_x_y">
-                        <TextField
-                            id="handlebar_stack"
-                            name="handlebarStack"
-                            style={{ width: 100 }}
-                            inputProps={{
-                                type: "text",
-                                inputMode: "numeric",
-                                pattern: "[0-9]*",
-                                "aria-label": "handlebar_stack",
-                            }}
-                            value={state.handlebarStack}
-                            disabled={
-                                inputError && inputError !== "handlebarStack"
-                            }
-                            error={inputError === "handlebarStack"}
-                            helperText={
-                                inputError === "handlebarStack"
-                                    ? "Numbers only"
-                                    : "HY (mm)"
-                            }
-                            onChange={(event) => validateNumbers(event)}
-                        />
-                        <TextField
-                            id="handlebar_reach"
-                            name="handlebarReach"
-                            style={{ width: 100 }}
-                            inputProps={{
-                                type: "text",
-                                inputMode: "numeric",
-                                pattern: "[0-9]*",
-                                "aria-label": "handlebar_reach",
-                            }}
-                            value={state.handlebarReach}
-                            disabled={
-                                inputError && inputError !== "handlebarReach"
-                            }
-                            error={inputError === "handlebarReach"}
-                            helperText={
-                                inputError === "handlebarReach"
-                                    ? "Numbers only"
-                                    : "HX (mm)"
-                            }
-                            onChange={(event) => validateNumbers(event)}
-                        />
-                    </div>
-                </div>
-                <div className={styles.diff}>
-                    <Typography>{stackMessage() ?? ""}</Typography>
-                    <Typography>{reachMessage() ?? ""}</Typography>
-                    <hr />
-                </div>
-                <div className={styles.sliderContainer}>
-                    <Typography variant="h5">Stem</Typography>
-                    <div className={styles.riserun}>
-                        <Typography>
-                            {totalRise < 0 ? "- Stack: " : "+ Stack: "}
-                            {Math.round(Math.abs(spacerRise + stemRise))}mm
-                        </Typography>
-                        <Typography>
-                            + Reach: {`${Math.round(totalRun)}mm`}
-                        </Typography>
-                    </div>
-                    <div className={styles.slider}>
-                        <Slider
-                            name="spacer"
-                            min={0}
-                            max={80}
-                            defaultValue={state.spacer}
-                            value={state.spacer}
-                            aria-label="spacer_slider"
-                            valueLabelDisplay="on"
-                            onChange={(event, value) =>
-                                setState({
-                                    input: event.target.name,
-                                    value: value,
-                                })
-                            }
-                            marks={[
-                                {
-                                    value: 0,
-                                    label: "0mm",
-                                },
-                                {
-                                    value: 40,
-                                    label: spacerLabel,
-                                },
-                                {
-                                    value: 80,
-                                    label: "80mm",
-                                },
-                            ]}
-                        />
-                    </div>
-
-                    <div className={styles.slider}>
-                        <Slider
-                            name="stem"
-                            min={70}
-                            max={140}
-                            step={10}
-                            defaultValue={state.stem}
-                            value={state.stem}
-                            aria-label="stem_slider"
-                            valueLabelDisplay="on"
-                            onChange={(event, value) =>
-                                setState({
-                                    input: event.target.name,
-                                    value: value,
-                                })
-                            }
-                            marks={[
-                                {
-                                    value: 70,
-                                    label: "70mm",
-                                },
-                                {
-                                    value: 105,
-                                    label: "Stem Length",
-                                },
-                                {
-                                    value: 140,
-                                    label: "140mm",
-                                },
-                            ]}
-                        />
-                    </div>
-
-                    <div className={styles.slider}>
-                        <Slider
-                            name="angleHt"
-                            min={65}
-                            max={85}
-                            step={0.25}
-                            defaultValue={state.angleHt}
-                            value={state.angleHt}
-                            aria-label="angleht_slider"
-                            valueLabelDisplay="on"
-                            onChange={(event, value) =>
-                                setState({
-                                    input: event.target.name,
-                                    value: value,
-                                })
-                            }
-                            marks={[
-                                {
-                                    value: 65,
-                                    label: <>65&deg;</>,
-                                },
-                                {
-                                    value: 75,
-                                    label: "Headtube Angle",
-                                },
-                                {
-                                    value: 85,
-                                    label: <>85&deg;</>,
-                                },
-                            ]}
-                        />
-                    </div>
-
-                    <div className={styles.slider}>
-                        <Slider
-                            name="angleStem"
-                            min={-60}
-                            max={60}
-                            defaultValue={state.angleStem}
-                            value={state.angleStem}
-                            aria-label="anglestem_slider"
-                            valueLabelDisplay="on"
-                            onChange={(event, value) =>
-                                setState({
-                                    input: event.target.name,
-                                    value: value,
-                                })
-                            }
-                            marks={[
-                                {
-                                    value: -60,
-                                    label: <>-60&deg;</>,
-                                },
-                                {
-                                    value: 0,
-                                    label: stemAngleLabel,
-                                },
-                                {
-                                    value: 60,
-                                    label: <>60&deg;</>,
-                                },
-                            ]}
-                        />
-                    </div>
-                </div>
-                <div className={styles.drawing}>
-                    <svg
-                        width="250"
-                        height="325"
-                        version="1.1"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
-                        <line
-                            aria-label="spacer"
-                            x1={state.stemXOrigin}
-                            y1={state.stemYOrigin}
-                            x2={topOfHTX}
-                            y2={topOfHTY}
-                            stroke="orange"
-                            strokeWidth="5"
-                        />
-                        <line
-                            aria-label="stem"
-                            x1={
-                                state.stemXOrigin +
-                                Math.cos(getRadians(flippedHeadtubeAngle)) *
-                                    state.spacer
-                            }
-                            y1={
-                                state.stemYOrigin -
-                                Math.sin(getRadians(flippedHeadtubeAngle)) *
-                                    state.spacer
-                            }
-                            x2={
-                                topOfHTX -
-                                Math.cos(getRadians(stemAngle)) * state.stem
-                            }
-                            y2={
-                                topOfHTY -
-                                Math.sin(getRadians(stemAngle)) * state.stem
-                            }
-                            stroke="blue"
-                            strokeWidth="5"
-                        />
-                    </svg>
-                </div>
-            </div>
-            <footer>
-                <Typography variant="body2" mt={5} mb={1} ml={1}>
-                    For suggestions or bug reports, please send an email to
-                    rswerve@gmail.com or{" "}
-                    <Link href="https://github.com/rswerve/bike_stem_calculator/issues/new/choose">
-                        open an issue
-                    </Link>{" "}
-                    on Github.
+        inurl && (
+            <>
+                <title>Bicycle Stem & Fit Calculator</title>
+                <Typography variant="h4" color="blue" mt={1} ml={1}>
+                    Bicycle Stem & Fit Calculator
                 </Typography>
-            </footer>
-        </>
+                {/* </header> */}
+                <div className={styles.gridlayout}>
+                    <div className={styles.intro}>
+                        <Typography variant="body1" paragraph>
+                            This is a road bike stem calculator that can also
+                            help translate measurements between a frame and a
+                            fitting.
+                        </Typography>
+                        <Typography variant="body1" paragraph>
+                            If you have frame and fit numbers, enter them below
+                            and adjust the sliders to see if a workable
+                            configuration is available. You want the sum of the
+                            frame and the stem to be as close as possible to HX
+                            and HY. Or you can just use the sliders as a simple
+                            stem calculator.
+                        </Typography>
+                        <Typography variant="body1" paragraph>
+                            To save your work, simply bookmark the page.
+                        </Typography>
+                    </div>
+                    <div className={styles.frame}>
+                        <Typography variant="h6">Frame</Typography>
+                        <div id="frame">
+                            <TextField
+                                disabled={inputError && inputError !== "stack"}
+                                error={inputError === "stack"}
+                                id="stack"
+                                name="stack"
+                                style={{ width: 100 }}
+                                helperText={
+                                    inputError === "stack"
+                                        ? "Numbers only"
+                                        : "Stack (mm)"
+                                }
+                                inputProps={{
+                                    type: "text",
+                                    inputMode: "numeric",
+                                    pattern: "[0-9]*",
+                                    "aria-label": "stack",
+                                }}
+                                value={state.stack}
+                                onChange={(event) => validateNumbers(event)}
+                            />
+                            <TextField
+                                id="reach"
+                                name="reach"
+                                style={{ width: 100 }}
+                                inputProps={{
+                                    type: "text",
+                                    inputMode: "numeric",
+                                    pattern: "[0-9]*",
+                                    "aria-label": "reach",
+                                }}
+                                value={state.reach}
+                                disabled={inputError && inputError !== "reach"}
+                                error={inputError === "reach"}
+                                helperText={
+                                    inputError === "reach"
+                                        ? "Numbers only"
+                                        : "Reach (mm)"
+                                }
+                                onChange={(event) => validateNumbers(event)}
+                            />
+                        </div>
+                    </div>
+                    <div className={styles.fit}>
+                        <Tooltip title={fitTooltip} leaveTouchDelay={10000}>
+                            <Typography variant="h6">
+                                Fit{" "}
+                                <InfoIcon
+                                    fontSize="small"
+                                    sx={{ color: "orange" }}
+                                />
+                            </Typography>
+                        </Tooltip>
+                        <div id="handlebar_x_y">
+                            <TextField
+                                id="handlebar_stack"
+                                name="handlebarStack"
+                                style={{ width: 100 }}
+                                inputProps={{
+                                    type: "text",
+                                    inputMode: "numeric",
+                                    pattern: "[0-9]*",
+                                    "aria-label": "handlebar_stack",
+                                }}
+                                value={state.handlebarStack}
+                                disabled={
+                                    inputError &&
+                                    inputError !== "handlebarStack"
+                                }
+                                error={inputError === "handlebarStack"}
+                                helperText={
+                                    inputError === "handlebarStack"
+                                        ? "Numbers only"
+                                        : "HY (mm)"
+                                }
+                                onChange={(event) => validateNumbers(event)}
+                            />
+                            <TextField
+                                id="handlebar_reach"
+                                name="handlebarReach"
+                                style={{ width: 100 }}
+                                inputProps={{
+                                    type: "text",
+                                    inputMode: "numeric",
+                                    pattern: "[0-9]*",
+                                    "aria-label": "handlebar_reach",
+                                }}
+                                value={state.handlebarReach}
+                                disabled={
+                                    inputError &&
+                                    inputError !== "handlebarReach"
+                                }
+                                error={inputError === "handlebarReach"}
+                                helperText={
+                                    inputError === "handlebarReach"
+                                        ? "Numbers only"
+                                        : "HX (mm)"
+                                }
+                                onChange={(event) => validateNumbers(event)}
+                            />
+                        </div>
+                    </div>
+                    <div className={styles.diff}>
+                        <Typography>{stackMessage() ?? ""}</Typography>
+                        <Typography>{reachMessage() ?? ""}</Typography>
+                        <hr />
+                    </div>
+                    <div className={styles.sliderContainer}>
+                        <Typography variant="h5">Stem</Typography>
+                        <div className={styles.riserun}>
+                            <Typography>
+                                {totalRise < 0 ? "- Stack: " : "+ Stack: "}
+                                {Math.round(Math.abs(spacerRise + stemRise))}mm
+                            </Typography>
+                            <Typography>
+                                + Reach: {`${Math.round(totalRun)}mm`}
+                            </Typography>
+                        </div>
+                        <div className={styles.slider}>
+                            <Slider
+                                name="spacer"
+                                min={0}
+                                max={80}
+                                defaultValue={state.spacer}
+                                value={state.spacer}
+                                aria-label="spacer_slider"
+                                valueLabelDisplay="on"
+                                onChange={(event, value) =>
+                                    setState({
+                                        input: event.target.name,
+                                        value: value,
+                                    })
+                                }
+                                marks={[
+                                    {
+                                        value: 0,
+                                        label: "0mm",
+                                    },
+                                    {
+                                        value: 40,
+                                        label: spacerLabel,
+                                    },
+                                    {
+                                        value: 80,
+                                        label: "80mm",
+                                    },
+                                ]}
+                            />
+                        </div>
+
+                        <div className={styles.slider}>
+                            <Slider
+                                name="stem"
+                                min={70}
+                                max={140}
+                                step={10}
+                                defaultValue={state.stem}
+                                value={state.stem}
+                                aria-label="stem_slider"
+                                valueLabelDisplay="on"
+                                onChange={(event, value) =>
+                                    setState({
+                                        input: event.target.name,
+                                        value: value,
+                                    })
+                                }
+                                marks={[
+                                    {
+                                        value: 70,
+                                        label: "70mm",
+                                    },
+                                    {
+                                        value: 105,
+                                        label: "Stem Length",
+                                    },
+                                    {
+                                        value: 140,
+                                        label: "140mm",
+                                    },
+                                ]}
+                            />
+                        </div>
+
+                        <div className={styles.slider}>
+                            <Slider
+                                name="angleHt"
+                                min={65}
+                                max={85}
+                                step={0.25}
+                                defaultValue={state.angleHt}
+                                value={state.angleHt}
+                                aria-label="angleht_slider"
+                                valueLabelDisplay="on"
+                                onChange={(event, value) =>
+                                    setState({
+                                        input: event.target.name,
+                                        value: value,
+                                    })
+                                }
+                                marks={[
+                                    {
+                                        value: 65,
+                                        label: <>65&deg;</>,
+                                    },
+                                    {
+                                        value: 75,
+                                        label: "Headtube Angle",
+                                    },
+                                    {
+                                        value: 85,
+                                        label: <>85&deg;</>,
+                                    },
+                                ]}
+                            />
+                        </div>
+
+                        <div className={styles.slider}>
+                            <Slider
+                                name="angleStem"
+                                min={-60}
+                                max={60}
+                                defaultValue={state.angleStem}
+                                value={state.angleStem}
+                                aria-label="anglestem_slider"
+                                valueLabelDisplay="on"
+                                onChange={(event, value) =>
+                                    setState({
+                                        input: event.target.name,
+                                        value: value,
+                                    })
+                                }
+                                marks={[
+                                    {
+                                        value: -60,
+                                        label: <>-60&deg;</>,
+                                    },
+                                    {
+                                        value: 0,
+                                        label: stemAngleLabel,
+                                    },
+                                    {
+                                        value: 60,
+                                        label: <>60&deg;</>,
+                                    },
+                                ]}
+                            />
+                        </div>
+                    </div>
+                    <div className={styles.drawing}>
+                        <svg
+                            width="250"
+                            height="325"
+                            version="1.1"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <line
+                                aria-label="spacer"
+                                x1={state.stemXOrigin}
+                                y1={state.stemYOrigin}
+                                x2={topOfHTX}
+                                y2={topOfHTY}
+                                stroke="orange"
+                                strokeWidth="5"
+                            />
+                            <line
+                                aria-label="stem"
+                                x1={
+                                    state.stemXOrigin +
+                                    Math.cos(getRadians(flippedHeadtubeAngle)) *
+                                        state.spacer
+                                }
+                                y1={
+                                    state.stemYOrigin -
+                                    Math.sin(getRadians(flippedHeadtubeAngle)) *
+                                        state.spacer
+                                }
+                                x2={
+                                    topOfHTX -
+                                    Math.cos(getRadians(stemAngle)) * state.stem
+                                }
+                                y2={
+                                    topOfHTY -
+                                    Math.sin(getRadians(stemAngle)) * state.stem
+                                }
+                                stroke="blue"
+                                strokeWidth="5"
+                            />
+                        </svg>
+                    </div>
+                </div>
+                <footer>
+                    <Typography variant="body2" mt={5} mb={1} ml={1}>
+                        For suggestions or bug reports, please send an email to
+                        rswerve@gmail.com or{" "}
+                        <Link href="https://github.com/rswerve/bike_stem_calculator/issues/new/choose">
+                            open an issue
+                        </Link>{" "}
+                        on Github.
+                    </Typography>
+                </footer>
+            </>
+        )
     );
 }
