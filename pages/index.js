@@ -1,4 +1,6 @@
-import { useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
+import { useQueryState } from "next-usequerystate";
+
 import { Link, Slider, Tooltip, TextField, Typography } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 import styles from "../styles/Home.module.css";
@@ -25,7 +27,11 @@ const reducer = (state, action) => {
 };
 
 export default function Home() {
-    const [state, setState] = useReducer(reducer, initialState);
+    const [inurl, setinurl] = useQueryState("urlstate", {
+        parse: JSON.parse,
+    });
+    const loadState = inurl || initialState;
+    const [state, setState] = useReducer(reducer, loadState);
     const [inputError, setInputError] = useState(null);
     const validateNumbers = (event) => {
         if (event.target.validity.patternMismatch) {
@@ -38,6 +44,9 @@ export default function Home() {
             });
         }
     };
+    useEffect(() => {
+        setinurl(JSON.stringify(state));
+    }, [state, setinurl]);
     const flippedHeadtubeAngle = 90 + (90 - state.angleHt);
     const stemAngle = 180 - state.angleStem;
     const topOfHTX =
@@ -184,6 +193,9 @@ export default function Home() {
                     <Typography variant="h6">Frame</Typography>
                     <div id="frame">
                         <TextField
+                            FormHelperTextProps={{
+                                suppressHydrationWarning: true,
+                            }}
                             disabled={inputError && inputError !== "stack"}
                             error={inputError === "stack"}
                             id="stack"
@@ -204,6 +216,9 @@ export default function Home() {
                             onChange={(event) => validateNumbers(event)}
                         />
                         <TextField
+                            FormHelperTextProps={{
+                                suppressHydrationWarning: true,
+                            }}
                             id="reach"
                             name="reach"
                             style={{ width: 100 }}
@@ -237,6 +252,9 @@ export default function Home() {
                     </Tooltip>
                     <div id="handlebar_x_y">
                         <TextField
+                            FormHelperTextProps={{
+                                suppressHydrationWarning: true,
+                            }}
                             id="handlebar_stack"
                             name="handlebarStack"
                             style={{ width: 100 }}
@@ -259,6 +277,9 @@ export default function Home() {
                             onChange={(event) => validateNumbers(event)}
                         />
                         <TextField
+                            FormHelperTextProps={{
+                                suppressHydrationWarning: true,
+                            }}
                             id="handlebar_reach"
                             name="handlebarReach"
                             style={{ width: 100 }}
@@ -283,23 +304,30 @@ export default function Home() {
                     </div>
                 </div>
                 <div className={styles.diff}>
-                    <Typography>{stackMessage() ?? ""}</Typography>
-                    <Typography>{reachMessage() ?? ""}</Typography>
+                    <Typography suppressHydrationWarning={true}>
+                        {stackMessage() ?? ""}
+                    </Typography>
+                    <Typography suppressHydrationWarning={true}>
+                        {reachMessage() ?? ""}
+                    </Typography>
                     <hr />
                 </div>
                 <div className={styles.sliderContainer}>
                     <Typography variant="h5">Stem</Typography>
                     <div className={styles.riserun}>
-                        <Typography>
+                        <Typography suppressHydrationWarning={true}>
                             {totalRise < 0 ? "- Stack: " : "+ Stack: "}
                             {Math.round(Math.abs(spacerRise + stemRise))}mm
                         </Typography>
-                        <Typography>
+                        <Typography suppressHydrationWarning={true}>
                             + Reach: {`${Math.round(totalRun)}mm`}
                         </Typography>
                     </div>
                     <div className={styles.slider}>
                         <Slider
+                            style={{
+                                suppressHydrationWarning: true,
+                            }}
                             name="spacer"
                             min={0}
                             max={80}
@@ -332,6 +360,9 @@ export default function Home() {
 
                     <div className={styles.slider}>
                         <Slider
+                            style={{
+                                suppressHydrationWarning: true,
+                            }}
                             name="stem"
                             min={70}
                             max={140}
@@ -365,6 +396,9 @@ export default function Home() {
 
                     <div className={styles.slider}>
                         <Slider
+                            style={{
+                                suppressHydrationWarning: true,
+                            }}
                             name="angleHt"
                             min={65}
                             max={85}
@@ -398,6 +432,9 @@ export default function Home() {
 
                     <div className={styles.slider}>
                         <Slider
+                            style={{
+                                suppressHydrationWarning: true,
+                            }}
                             name="angleStem"
                             min={-60}
                             max={60}
