@@ -193,9 +193,6 @@ export default function Home() {
                     <Typography variant="h6">Frame</Typography>
                     <div id="frame">
                         <TextField
-                            FormHelperTextProps={{
-                                suppressHydrationWarning: true,
-                            }}
                             disabled={inputError && inputError !== "stack"}
                             error={inputError === "stack"}
                             id="stack"
@@ -216,9 +213,6 @@ export default function Home() {
                             onChange={(event) => validateNumbers(event)}
                         />
                         <TextField
-                            FormHelperTextProps={{
-                                suppressHydrationWarning: true,
-                            }}
                             id="reach"
                             name="reach"
                             style={{ width: 100 }}
@@ -252,9 +246,6 @@ export default function Home() {
                     </Tooltip>
                     <div id="handlebar_x_y">
                         <TextField
-                            FormHelperTextProps={{
-                                suppressHydrationWarning: true,
-                            }}
                             id="handlebar_stack"
                             name="handlebarStack"
                             style={{ width: 100 }}
@@ -277,9 +268,6 @@ export default function Home() {
                             onChange={(event) => validateNumbers(event)}
                         />
                         <TextField
-                            FormHelperTextProps={{
-                                suppressHydrationWarning: true,
-                            }}
                             id="handlebar_reach"
                             name="handlebarReach"
                             style={{ width: 100 }}
@@ -304,30 +292,23 @@ export default function Home() {
                     </div>
                 </div>
                 <div className={styles.diff}>
-                    <Typography suppressHydrationWarning={true}>
-                        {stackMessage() ?? ""}
-                    </Typography>
-                    <Typography suppressHydrationWarning={true}>
-                        {reachMessage() ?? ""}
-                    </Typography>
+                    <Typography>{stackMessage() ?? ""}</Typography>
+                    <Typography>{reachMessage() ?? ""}</Typography>
                     <hr />
                 </div>
                 <div className={styles.sliderContainer}>
                     <Typography variant="h5">Stem</Typography>
                     <div className={styles.riserun}>
-                        <Typography suppressHydrationWarning={true}>
+                        <Typography>
                             {totalRise < 0 ? "- Stack: " : "+ Stack: "}
                             {Math.round(Math.abs(spacerRise + stemRise))}mm
                         </Typography>
-                        <Typography suppressHydrationWarning={true}>
+                        <Typography>
                             + Reach: {`${Math.round(totalRun)}mm`}
                         </Typography>
                     </div>
                     <div className={styles.slider}>
                         <Slider
-                            style={{
-                                suppressHydrationWarning: true,
-                            }}
                             name="spacer"
                             min={0}
                             max={80}
@@ -360,9 +341,6 @@ export default function Home() {
 
                     <div className={styles.slider}>
                         <Slider
-                            style={{
-                                suppressHydrationWarning: true,
-                            }}
                             name="stem"
                             min={70}
                             max={140}
@@ -396,9 +374,6 @@ export default function Home() {
 
                     <div className={styles.slider}>
                         <Slider
-                            style={{
-                                suppressHydrationWarning: true,
-                            }}
                             name="angleHt"
                             min={65}
                             max={85}
@@ -432,9 +407,6 @@ export default function Home() {
 
                     <div className={styles.slider}>
                         <Slider
-                            style={{
-                                suppressHydrationWarning: true,
-                            }}
                             name="angleStem"
                             min={-60}
                             max={60}
