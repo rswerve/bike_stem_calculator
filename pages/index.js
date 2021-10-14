@@ -3,7 +3,7 @@ import { useQueryState } from "next-usequerystate";
 import { Link, Slider, Tooltip, TextField, Typography } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 import styles from "../styles/Home.module.css";
-import useDebounce from "./useDebounce";
+import useDebounce from "../hooks/useDebounce";
 
 const initialState = {
     stemXOrigin: 100,
