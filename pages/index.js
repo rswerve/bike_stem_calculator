@@ -336,12 +336,15 @@ export default function Home() {
                                 value={state.spacer}
                                 aria-label="spacer_slider"
                                 valueLabelDisplay="on"
-                                onChange={(event, value) =>
+                                onChange={(event, value) => {
+                                    if (event.type === "mousedown") {
+                                        return;
+                                    }
                                     setState({
                                         input: event.target.name,
                                         value: value,
-                                    })
-                                }
+                                    });
+                                }}
                                 marks={[
                                     {
                                         value: 0,
@@ -369,12 +372,15 @@ export default function Home() {
                                 value={state.stem}
                                 aria-label="stem_slider"
                                 valueLabelDisplay="on"
-                                onChange={(event, value) =>
+                                onChange={(event, value) => {
+                                    if (event.type === "mousedown") {
+                                        return;
+                                    }
                                     setState({
                                         input: event.target.name,
                                         value: value,
-                                    })
-                                }
+                                    });
+                                }}
                                 marks={[
                                     {
                                         value: 70,
@@ -402,12 +408,15 @@ export default function Home() {
                                 value={state.angleHt}
                                 aria-label="angleht_slider"
                                 valueLabelDisplay="on"
-                                onChange={(event, value) =>
+                                onChange={(event, value) => {
+                                    if (event.type === "mousedown") {
+                                        return;
+                                    }
                                     setState({
                                         input: event.target.name,
                                         value: value,
-                                    })
-                                }
+                                    });
+                                }}
                                 marks={[
                                     {
                                         value: 65,
@@ -434,12 +443,15 @@ export default function Home() {
                                 value={state.angleStem}
                                 aria-label="anglestem_slider"
                                 valueLabelDisplay="on"
-                                onChange={(event, value) =>
+                                onChange={(event, value) => {
+                                    if (event.type === "mousedown") {
+                                        return;
+                                    }
                                     setState({
                                         input: event.target.name,
                                         value: value,
-                                    })
-                                }
+                                    });
+                                }}
                                 marks={[
                                     {
                                         value: -60,
