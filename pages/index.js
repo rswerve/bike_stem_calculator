@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useLayoutEffect, useReducer, useState } from "react";
 import { useQueryState } from "next-usequerystate";
 import { Link, Slider, Tooltip, TextField, Typography } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
@@ -27,7 +27,7 @@ const reducer = (state, action) => {
 };
 
 export default function Home() {
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (typeof window !== "undefined") {
             const scrollPosition =
                 window.sessionStorage.getItem("scrollPosition");
