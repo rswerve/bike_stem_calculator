@@ -337,7 +337,10 @@ export default function Home() {
                                 aria-label="spacer_slider"
                                 valueLabelDisplay="on"
                                 onChange={(event, value) => {
-                                    if (event.type === "mousedown") {
+                                    if (
+                                        event.type !== "mousemove" &&
+                                        event.type !== "touchmove"
+                                    ) {
                                         return;
                                     }
                                     setState({
@@ -373,7 +376,10 @@ export default function Home() {
                                 aria-label="stem_slider"
                                 valueLabelDisplay="on"
                                 onChange={(event, value) => {
-                                    if (event.type === "mousedown") {
+                                    if (
+                                        event.type !== "mousemove" &&
+                                        event.type !== "touchmove"
+                                    ) {
                                         return;
                                     }
                                     setState({
@@ -409,7 +415,10 @@ export default function Home() {
                                 aria-label="angleht_slider"
                                 valueLabelDisplay="on"
                                 onChange={(event, value) => {
-                                    if (event.type === "mousedown") {
+                                    if (
+                                        event.type !== "mousemove" &&
+                                        event.type !== "touchmove"
+                                    ) {
                                         return;
                                     }
                                     setState({
@@ -444,7 +453,10 @@ export default function Home() {
                                 aria-label="anglestem_slider"
                                 valueLabelDisplay="on"
                                 onChange={(event, value) => {
-                                    if (event.type === "mousedown") {
+                                    if (
+                                        event.type !== "mousemove" &&
+                                        event.type !== "touchmove"
+                                    ) {
                                         return;
                                     }
                                     setState({
