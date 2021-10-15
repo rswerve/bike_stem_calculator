@@ -27,6 +27,16 @@ const reducer = (state, action) => {
 };
 
 export default function Home() {
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const scrollPosition =
+                window.sessionStorage.getItem("scrollPosition");
+            if (scrollPosition) {
+                window.scrollTo(0, parseInt(scrollPosition));
+                window.sessionStorage.removeItem("scrollPosition");
+            }
+        }
+    });
     const [inurl, setinurl] = useQueryState("urlstate", {
         parse: JSON.parse,
     });
@@ -46,6 +56,7 @@ export default function Home() {
         }
     };
     useEffect(() => {
+        window.sessionStorage.setItem("scrollPosition", window.scrollY);
         setinurl(JSON.stringify(debouncedState));
     }, [debouncedState, setinurl]);
     const flippedHeadtubeAngle = 90 + (90 - state.angleHt);
