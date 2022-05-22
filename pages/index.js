@@ -253,15 +253,15 @@ export default function Home() {
                         </div>
                     </div>
                     <div className={styles.fit}>
-                        <Tooltip title={fitTooltip} leaveTouchDelay={10000}>
                             <Typography variant="h6">
                                 Fit{" "}
+                        <Tooltip title={fitTooltip} leaveTouchDelay={10000}>
                                 <InfoIcon
                                     fontSize="small"
                                     sx={{ color: "orange" }}
                                 />
-                            </Typography>
                         </Tooltip>
+                            </Typography>
                         <div id="handlebar_x_y">
                             <TextField
                                 id="handlebar_stack"
