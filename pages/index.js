@@ -59,6 +59,7 @@ export default function Home() {
         window.sessionStorage.setItem("scrollPosition", window.scrollY);
         setinurl(JSON.stringify(debouncedState));
     }, [debouncedState, setinurl]);
+    
     const flippedHeadtubeAngle = 90 + (90 - state.angleHt);
     const stemAngle = 180 - state.angleStem;
     const topOfHTX =
