@@ -492,8 +492,8 @@ export default function Home() {
                     <Typography variant="body2" mt={5} mb={1} ml={1}>
                         For suggestions or bug reports, please send an email to
                         rswerve@gmail.com or{" "}
-                        <Link href="https://github.com/rswerve/bike_stem_calculator/discussions/new">
-                            start a discussion
+                        <Link href="https://github.com/rswerve/bike_stem_calculator/issues">
+                            open an issue
                         </Link>{" "}
                         on Github.
                     </Typography>
