@@ -2,7 +2,7 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(150px, 200px));
   grid-template-rows: repeat(autofit, minmax(150px, 1fr));
-  font-family: "Verdana";
+  font-family: Verdana, sans-serif;
   margin-left: 50px;
   gap: 20px;
 }
