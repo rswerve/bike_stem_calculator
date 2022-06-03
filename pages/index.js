@@ -44,6 +44,18 @@ export default function Home() {
     const [state, setState] = useReducer(reducer, loadState);
     const debouncedState = useDebounce(state, 250);
     const [inputError, setInputError] = useState(null);
+    const onSliderDrag = (event, value) => {
+        if (
+            event.type !== "mousemove" &&
+            event.type !== "touchmove"
+        ) {
+            return;
+        }
+        setState({
+            input: event.target.name,
+            value: value,
+        });
+    }
     const validateNumbers = (event) => {
         if (event.target.validity.patternMismatch) {
             setInputError(event.target.name);
@@ -59,7 +71,7 @@ export default function Home() {
         window.sessionStorage.setItem("scrollPosition", window.scrollY);
         setinurl(JSON.stringify(debouncedState));
     }, [debouncedState, setinurl]);
-    
+
     const flippedHeadtubeAngle = 90 + (90 - state.angleHt);
     const stemAngle = 180 - state.angleStem;
     const topOfHTX =
@@ -337,18 +349,7 @@ export default function Home() {
                                 value={state.spacer}
                                 aria-label="spacer_slider"
                                 valueLabelDisplay="on"
-                                onChange={(event, value) => {
-                                    if (
-                                        event.type !== "mousemove" &&
-                                        event.type !== "touchmove"
-                                    ) {
-                                        return;
-                                    }
-                                    setState({
-                                        input: event.target.name,
-                                        value: value,
-                                    });
-                                }}
+                                onChange={onSliderDrag}
                                 marks={[
                                     {
                                         value: 0,
@@ -376,18 +377,7 @@ export default function Home() {
                                 value={state.stem}
                                 aria-label="stem_slider"
                                 valueLabelDisplay="on"
-                                onChange={(event, value) => {
-                                    if (
-                                        event.type !== "mousemove" &&
-                                        event.type !== "touchmove"
-                                    ) {
-                                        return;
-                                    }
-                                    setState({
-                                        input: event.target.name,
-                                        value: value,
-                                    });
-                                }}
+                                onChange={onSliderDrag}
                                 marks={[
                                     {
                                         value: 70,
@@ -415,18 +405,7 @@ export default function Home() {
                                 value={state.angleHt}
                                 aria-label="angleht_slider"
                                 valueLabelDisplay="on"
-                                onChange={(event, value) => {
-                                    if (
-                                        event.type !== "mousemove" &&
-                                        event.type !== "touchmove"
-                                    ) {
-                                        return;
-                                    }
-                                    setState({
-                                        input: event.target.name,
-                                        value: value,
-                                    });
-                                }}
+                                onChange={onSliderDrag}
                                 marks={[
                                     {
                                         value: 65,
@@ -453,18 +432,7 @@ export default function Home() {
                                 value={state.angleStem}
                                 aria-label="anglestem_slider"
                                 valueLabelDisplay="on"
-                                onChange={(event, value) => {
-                                    if (
-                                        event.type !== "mousemove" &&
-                                        event.type !== "touchmove"
-                                    ) {
-                                        return;
-                                    }
-                                    setState({
-                                        input: event.target.name,
-                                        value: value,
-                                    });
-                                }}
+                                onChange={onSliderDrag}
                                 marks={[
                                     {
                                         value: -60,
