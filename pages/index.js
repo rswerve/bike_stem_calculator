@@ -91,9 +91,7 @@ export default function Home() {
             state.handlebarStack === "" ||
             state.handlebarStack === 0 ||
             state.stack === "" ||
-            state.stack === 0 ||
-            spacerRise === "" ||
-            stemRise === ""
+            state.stack === 0
         ) {
             return;
         }
@@ -120,9 +118,7 @@ export default function Home() {
             state.handlebarReach === "" ||
             state.handlebarReach === 0 ||
             state.reach === "" ||
-            state.reach === 0 ||
-            spacerRun === "" ||
-            stemRun === ""
+            state.reach === 0
         ) {
             return;
         }
