@@ -266,7 +266,7 @@ function Fit() {
 			<>
 				<title>{`${state.name} Bicycle Stem & Fit Calculator`}</title>
 				<div className="name">
-					<Typography variant="h6">Name your configuration</Typography>
+					<Typography style={{ width: 250 }} variant="h6">Name your configuration</Typography>
 					<div id="name">
 						<TextField
 							disabled={inputError && inputError !== "name"}
