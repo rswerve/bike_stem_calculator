@@ -18,23 +18,28 @@
   grid-column: 1 / span 3;
 }
 
-.frame {
+.name {
   grid-row: 2 / span 1;
   grid-column: 1 / span 1;
 }
 
+.frame {
+  grid-row: 3 / span 1;
+  grid-column: 1 / span 1;
+}
+
 .fit {
-  grid-row: 2 / span 1;
+  grid-row: 3 / span 1;
   grid-column: 2 / span 1;
 }
 
 .diff {
-  grid-row: 3 / span 1;
+  grid-row: 4 / span 1;
   grid-column: 1 / span 2;
 }
 
 .sliderContainer {
-  grid-row: 4 / span 1;
+  grid-row: 5 / span 1;
   grid-column: 1 / span 2;
 }
 
@@ -43,7 +48,7 @@
 }
 
 .drawing {
-  grid-row: 4 / span 1;
+  grid-row: 5 / span 1;
   grid-column: 3 / span 1;
 }
 
