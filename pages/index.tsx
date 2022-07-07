@@ -172,18 +172,19 @@ function Fit() {
 		);
 	};
 	const stackMessage = () => {
-		if (stackDiff() == null) {
+		const diff = stackDiff();
+		if (diff === undefined) {
 			return;
 		}
 		const diffNote =
-			stackDiff() !== 0 && stackDiff() !== null
-				? stackDiff() < 0
+			diff !== 0
+				? diff < 0
 					? "TOO TALL"
 					: "TOO SHORT"
 				: "JUST RIGHT";
 		return diffNote === "JUST RIGHT"
 			? `Stack is ${diffNote}`
-			: `Stack is ${diffNote} by ${Math.abs(stackDiff())}mm`;
+			: `Stack is ${diffNote} by ${Math.abs(diff)}mm`;
 	};
 	const reachDiff = () => {
 		if (
@@ -199,18 +200,19 @@ function Fit() {
 		);
 	};
 	const reachMessage = () => {
-		if (reachDiff() == null) {
+		const diff = reachDiff();
+		if (diff === undefined) {
 			return;
 		}
 		const diffNote =
-			reachDiff() !== 0
-				? reachDiff() < 0
+			diff !== 0
+				? diff < 0
 					? "TOO LONG"
 					: "TOO SHORT"
 				: "JUST RIGHT";
 		return diffNote === "JUST RIGHT"
 			? `Reach is ${diffNote}`
-			: `Reach is ${diffNote} by ${Math.abs(reachDiff())}mm`;
+			: `Reach is ${diffNote} by ${Math.abs(diff)}mm`;
 	};
 
 	const fitTooltip = (
@@ -264,12 +266,12 @@ function Fit() {
 	return (
 		inurl && (
 			<>
-				<title>{`${state.name} Bicycle Stem & Fit Calculator`}</title>
+				<title>{`${state.name ?? ""} Bicycle Stem & Fit Calculator`}</title>
 				<div className="name">
 					<Typography style={{ width: 250 }} variant="h6">Name your configuration</Typography>
 					<div id="name">
 						<TextField
-							disabled={inputError && inputError !== "name"}
+							disabled={Boolean(inputError && inputError !== "name")}
 							error={inputError === "name"}
 							name="name"
 							value={state.name}
@@ -284,7 +286,7 @@ function Fit() {
 					<Typography variant="h6">Frame</Typography>
 					<div id="frame">
 						<TextField
-							disabled={inputError && inputError !== "stack"}
+							disabled={Boolean(inputError && inputError !== "stack")}
 							error={inputError === "stack"}
 							id="stack"
 							name="stack"
@@ -314,7 +316,7 @@ function Fit() {
 								"aria-label": "reach",
 							}}
 							value={state.reach}
-							disabled={inputError && inputError !== "reach"}
+							disabled={Boolean(inputError && inputError !== "reach")}
 							error={inputError === "reach"}
 							helperText={
 								inputError === "reach"
@@ -347,9 +349,9 @@ function Fit() {
 								"aria-label": "handlebar_stack",
 							}}
 							value={state.handlebarStack}
-							disabled={
+							disabled={Boolean(
 								inputError &&
-								inputError !== "handlebarStack"
+								inputError !== "handlebarStack")
 							}
 							error={inputError === "handlebarStack"}
 							helperText={
@@ -370,9 +372,9 @@ function Fit() {
 								"aria-label": "handlebar_reach",
 							}}
 							value={state.handlebarReach}
-							disabled={
+							disabled={Boolean(
 								inputError &&
-								inputError !== "handlebarReach"
+								inputError !== "handlebarReach")
 							}
 							error={inputError === "handlebarReach"}
 							helperText={
@@ -403,7 +405,7 @@ function Fit() {
 					<div className={styles.slider}>
 						<Slider
 							name="spacer"
-							disabled={inputError && inputError !== "spacer"}
+							disabled={Boolean(inputError && inputError !== "spacer")}
 							min={0}
 							max={80}
 							defaultValue={state.spacer}
@@ -431,7 +433,7 @@ function Fit() {
 					<div className={styles.slider}>
 						<Slider
 							name="stem"
-							disabled={inputError && inputError !== "stem"}
+							disabled={Boolean(inputError && inputError !== "stem")}
 							min={70}
 							max={140}
 							step={10}
@@ -460,7 +462,7 @@ function Fit() {
 					<div className={styles.slider}>
 						<Slider
 							name="angleHt"
-							disabled={inputError && inputError !== "angleHt"}
+							disabled={Boolean(inputError && inputError !== "angleHt")}
 							min={65}
 							max={85}
 							step={0.25}
@@ -489,7 +491,7 @@ function Fit() {
 					<div className={styles.slider}>
 						<Slider
 							name="angleStem"
-							disabled={inputError && inputError !== "angleStem"}
+							disabled={Boolean(inputError && inputError !== "angleStem")}
 							min={-60}
 							max={60}
 							defaultValue={state.angleStem}
