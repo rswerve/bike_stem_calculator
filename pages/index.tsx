@@ -35,11 +35,6 @@ export default function Home() {
 		setShowChild(true);
 	}, []);
 
-	if (!showChild) {
-		// You can show some kind of placeholder UI here
-		return null;
-	}
-
 	return (
 		<>
 			<Typography variant="h4" color="blue" mt={1} ml={1}>
@@ -68,9 +63,9 @@ export default function Home() {
 						To save your work, simply bookmark the page.
 					</Typography>
 				</div>
-				<Fit />
+				{showChild ? <Fit /> : null}
 			</div>
-			<footer>
+			{showChild ? <footer>
 				<Typography variant="body2" mt={5} mb={1} ml={1}>
 					For suggestions or bug reports, please send an email to
 					rswerve@gmail.com or{" "}
@@ -79,7 +74,7 @@ export default function Home() {
 					</Link>{" "}
 					on Github.
 				</Typography>
-			</footer>
+			</footer> : null}
 		</>
 	)
 }
