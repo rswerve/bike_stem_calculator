@@ -65,7 +65,7 @@ export default function Home() {
 				</div>
 				{showChild ? <Fit /> : null} {/* could add a loader here */}
 			</div>
-			{showChild ? <footer>
+			{showChild ? <footer className={styles.footer}>
 				<Typography variant="body2" mt={5} mb={1} ml={1}>
 					For suggestions or bug reports, please send an email to
 					rswerve@gmail.com or{" "}
@@ -97,6 +97,9 @@ function Fit() {
 	const [state, setState] = useReducer(reducer, loadState);
 	const debouncedState = useDebounce(state, 250);
 	const [inputError, setInputError] = useState(null);
+	/* a 1:1 ratio between millimeters and pixels makes the drawing quite large
+	so we scale the drawing down to fit */
+	const SHRINK_FACTOR = 2.3;
 	const onSliderDrag = (event, value) => {
 		if (
 			event.type !== "mousemove" &&
@@ -242,7 +245,7 @@ function Fit() {
 		</Typography>
 	);
 	const spacerLabel = (
-		<Tooltip title={spacerTooltip} leaveTouchDelay={10000}>
+		<Tooltip title={spacerTooltip} leaveTouchDelay={10000} enterTouchDelay={5}>
 			<Typography sx={{ fontSize: "0.875rem", fontWeight: "regular" }}>
 				Spacer height{" "}
 				<InfoIcon fontSize="small" sx={{ color: "orange" }} />
@@ -325,7 +328,7 @@ function Fit() {
 				<div className={styles.fit}>
 					<Typography variant="h6">
 						Fit{" "}
-						<Tooltip title={fitTooltip} leaveTouchDelay={10000}>
+						<Tooltip title={fitTooltip} leaveTouchDelay={10000} enterTouchDelay={5}>
 							<InfoIcon
 								fontSize="small"
 								sx={{ color: "orange" }}
@@ -387,7 +390,7 @@ function Fit() {
 					<hr />
 				</div>
 				<div className={styles.sliderContainer}>
-					<Typography variant="h5">Stem</Typography>
+					<Typography variant="h5">Result</Typography>
 					<div className={styles.riserun}>
 						<Typography>
 							{totalRise < 0 ? "- Stack: " : "+ Stack: "}
@@ -397,7 +400,7 @@ function Fit() {
 							+ Reach: {`${Math.round(totalRun)}mm`}
 						</Typography>
 					</div>
-					<div className={styles.slider}>
+					<div className={styles.topslider}>
 						<Slider
 							name="spacer"
 							disabled={Boolean(inputError && inputError !== "spacer")}
@@ -520,32 +523,32 @@ function Fit() {
 					>
 						<line
 							aria-label="spacer"
-							x1={state.stemXOrigin}
-							y1={state.stemYOrigin}
-							x2={topOfHTX}
-							y2={topOfHTY}
+							x1={state.stemXOrigin / SHRINK_FACTOR}
+							y1={state.stemYOrigin / SHRINK_FACTOR}
+							x2={topOfHTX / SHRINK_FACTOR}
+							y2={topOfHTY / SHRINK_FACTOR}
 							stroke="orange"
 							strokeWidth="5"
 						/>
 						<line
 							aria-label="stem"
 							x1={
-								state.stemXOrigin +
-								Math.cos(getRadians(flippedHeadtubeAngle)) *
-								state.spacer
+								(state.stemXOrigin +
+									Math.cos(getRadians(flippedHeadtubeAngle)) *
+									state.spacer) / SHRINK_FACTOR
 							}
 							y1={
-								state.stemYOrigin -
-								Math.sin(getRadians(flippedHeadtubeAngle)) *
-								state.spacer
+								(state.stemYOrigin -
+									Math.sin(getRadians(flippedHeadtubeAngle)) *
+									state.spacer) / SHRINK_FACTOR
 							}
 							x2={
-								topOfHTX -
-								Math.cos(getRadians(stemAngle)) * state.stem
+								(topOfHTX -
+									Math.cos(getRadians(stemAngle)) * state.stem) / SHRINK_FACTOR
 							}
 							y2={
-								topOfHTY -
-								Math.sin(getRadians(stemAngle)) * state.stem
+								(topOfHTY -
+									Math.sin(getRadians(stemAngle)) * state.stem) / SHRINK_FACTOR
 							}
 							stroke="blue"
 							strokeWidth="5"

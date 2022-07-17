@@ -12,6 +12,10 @@
   margin-left: 10px;
 }
 
+.footer {
+  margin-bottom: 50px;
+}
+
 .intro {
   margin-top: 10px;
   grid-row: 1 / span 1;
@@ -49,12 +53,10 @@
 
 .drawing {
   grid-row: 5 / span 1;
-  grid-column: 3 / span 1;
+  grid-column: 2 / span 1;
 }
 
 .slider {
   margin-top: 30px;
   height: 80px;
 }
-
-
