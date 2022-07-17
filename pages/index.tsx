@@ -400,7 +400,7 @@ function Fit() {
 							+ Reach: {`${Math.round(totalRun)}mm`}
 						</Typography>
 					</div>
-					<div className={styles.topslider}>
+					<div className={styles.slider}>
 						<Slider
 							name="spacer"
 							disabled={Boolean(inputError && inputError !== "spacer")}
