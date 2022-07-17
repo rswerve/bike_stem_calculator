@@ -63,7 +63,7 @@ export default function Home() {
 						To save your work, simply bookmark the page.
 					</Typography>
 				</div>
-				{showChild ? <Fit /> : null}
+				{showChild ? <Fit /> : null} {/* could add a loader here */}
 			</div>
 			{showChild ? <footer>
 				<Typography variant="body2" mt={5} mb={1} ml={1}>
