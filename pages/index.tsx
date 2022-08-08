@@ -274,6 +274,7 @@ function Fit() {
 							name="name"
 							value={state.name}
 							onChange={handleConfigurationName}
+							defaultValue={state.name}
 							id="name"
 							style={{ width: 421 }}
 							helperText={inputError === "name" ? "That's too long" : ""}
