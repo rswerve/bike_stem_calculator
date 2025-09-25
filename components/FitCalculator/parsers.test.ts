@@ -1,3 +1,4 @@
+import { expect } from "@jest/globals";
 import { FitState } from "./types";
 import { INITIAL_FIT_STATE } from "./constants";
 import { createFitStateParser, fitStateParser } from "./parsers";

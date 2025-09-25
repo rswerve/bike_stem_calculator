@@ -21,7 +21,7 @@ type TooltipContent = JSX.Element | string;
 const fitTooltip: TooltipContent = (
   <Typography variant="body1">
     HY and HX are measured from the bottom bracket to the center of the
-    handlebars. {" "}
+    handlebars.{" "}
     <a
       href="https://web.archive.org/web/20200809061637/https://www.slowtwitch.com/Bike_Fit/The_Secret_Weapon_of_Superstar_Fitters_HX_6335.html"
       target="_blank"
@@ -77,7 +77,8 @@ const useScrollRestoration = () => {
 };
 
 const useUrlState = () =>
-  useQueryState<FitState | null>("urlstate", fitStateParser, {
+  useQueryState<FitState | null>("urlstate", {
+    ...fitStateParser,
     history: "replace",
   });
 
