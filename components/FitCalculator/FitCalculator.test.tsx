@@ -17,17 +17,20 @@ describe("FitCalculator", () => {
     mockSetQueryState.mockClear();
   });
 
-  it("renders default headers", async () => {
+  it("renders and syncs inputs to query state", async () => {
     const user = userEvent.setup();
 
     render(<FitCalculator />);
 
-    expect(screen.getByText(/Bicycle Stem & Fit Calculator/i)).toBeTruthy();
+    const frameHeading = screen.getByRole("heading", { name: /frame/i });
+    expect(frameHeading).toBeDefined();
 
-    const spacerSlider = screen.getByRole("slider", { name: /spacer/i });
-    await user.click(spacerSlider);
+    const [frameStackInput] = screen.getAllByLabelText(/stack/i, {
+      selector: "input",
+    });
+    await user.type(frameStackInput, "45");
 
-    expect(spacerSlider).toBeTruthy();
+    expect((frameStackInput as HTMLInputElement).value).toBe("45");
     expect(mockSetQueryState).toHaveBeenCalled();
   });
 });
