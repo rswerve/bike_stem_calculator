@@ -45,7 +45,7 @@ const parseFitState = (
   try {
     const parsed = JSON.parse(value);
     if (isFitState(parsed)) {
-      return parsed;
+      return parsed as FitState;
     }
   } catch (error) {
     console.warn("Invalid fit state in query string", error);
