@@ -45,7 +45,7 @@ const parseFitState = (
   try {
     const parsed = JSON.parse(value);
     if (isFitState(parsed)) {
-      return parsed as FitState;
+      return parsed;
     }
   } catch (error) {
     console.warn("Invalid fit state in query string", error);
@@ -54,9 +54,7 @@ const parseFitState = (
   return fallback ?? null;
 };
 
-export const createFitStateParser = (
-  options: FitStateParserOptions = {}
-) =>
+export const createFitStateParser = (options: FitStateParserOptions = {}) =>
   createParser<FitState | null>({
     parse: (value) => parseFitState(value, options.fallback),
     serialize: (value) => {
