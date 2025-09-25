@@ -16,6 +16,37 @@ import {
   formatDiffMessage,
 } from "./utils";
 
+type TooltipContent = JSX.Element | string;
+
+const fitTooltip: TooltipContent = (
+  <Typography variant="body1">
+    HY and HX are measured from the bottom bracket to the center of the
+    handlebars. {" "}
+    <a
+      href="https://web.archive.org/web/20200809061637/https://www.slowtwitch.com/Bike_Fit/The_Secret_Weapon_of_Superstar_Fitters_HX_6335.html"
+      target="_blank"
+      rel="noreferrer"
+    >
+      <u>This article</u>
+    </a>{" "}
+    is a good explanation of the importance of these measurements.
+  </Typography>
+);
+
+const spacerTooltip: TooltipContent = (
+  <Typography variant="body1">
+    Include everything between the headset and the handlebar clamp--like the
+    headset top cap--in addition to the spacers. Note that bikes with carbon
+    steerers are recommended not to exceed about 40mm in spacers.
+  </Typography>
+);
+
+const stemAngleTooltip: TooltipContent = (
+  <Typography variant="body1">
+    Measured from the horizontal, not relative to the headtube angle
+  </Typography>
+);
+
 const reducer = (state: FitState, action: FitReducerAction): FitState => {
   switch (action.type) {
     case "update": {
