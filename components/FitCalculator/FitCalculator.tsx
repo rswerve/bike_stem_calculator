@@ -1,12 +1,13 @@
 import { useEffect, useLayoutEffect, useReducer, useState } from "react";
 import { Slider, TextField, Tooltip, Typography } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
-import { useQueryState } from "next-usequerystate";
+import { useQueryState } from "nuqs";
 
 import useDebounce from "../../hooks/useDebounce";
 import styles from "../../styles/Home.module.css";
 
 import { INITIAL_FIT_STATE, SHRINK_FACTOR } from "./constants";
+import { fitStateParser } from "./parsers";
 import { FitReducerAction, FitState } from "./types";
 import {
   calculateGeometry,
@@ -14,37 +15,6 @@ import {
   calculateStackDiff,
   formatDiffMessage,
 } from "./utils";
-
-type TooltipContent = JSX.Element | string;
-
-const fitTooltip: TooltipContent = (
-  <Typography variant="body1">
-    HY and HX are measured from the bottom bracket to the center of the
-    handlebars.{" "}
-    <a
-      href="https://web.archive.org/web/20200809061637/https://www.slowtwitch.com/Bike_Fit/The_Secret_Weapon_of_Superstar_Fitters_HX_6335.html"
-      target="_blank"
-      rel="noreferrer"
-    >
-      <u>This article</u>
-    </a>{" "}
-    is a good explanation of the importance of these measurements.
-  </Typography>
-);
-
-const spacerTooltip: TooltipContent = (
-  <Typography variant="body1">
-    Include everything between the headset and the handlebar clamp--like the
-    headset top cap--in addition to the spacers. Note that bikes with carbon
-    steerers are recommended not to exceed about 40mm in spacers.
-  </Typography>
-);
-
-const stemAngleTooltip: TooltipContent = (
-  <Typography variant="body1">
-    Measured from the horizontal, not relative to the headtube angle
-  </Typography>
-);
 
 const reducer = (state: FitState, action: FitReducerAction): FitState => {
   switch (action.type) {
@@ -76,9 +46,8 @@ const useScrollRestoration = () => {
 };
 
 const useUrlState = () =>
-  useQueryState<FitState | null>("urlstate", {
-    parse: JSON.parse,
-    serialize: JSON.stringify,
+  useQueryState<FitState | null>("urlstate", fitStateParser, {
+    history: "replace",
   });
 
 const useFitState = () => {
@@ -94,7 +63,7 @@ const useFitState = () => {
     }
 
     window.sessionStorage.setItem("scrollPosition", window.scrollY.toString());
-    setInUrl(debouncedState);
+    void setInUrl(debouncedState);
   }, [debouncedState, setInUrl]);
 
   return {
