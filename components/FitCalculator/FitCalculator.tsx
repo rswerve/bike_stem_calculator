@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useReducer, useState } from "react";
+import { useEffect, useLayoutEffect, useReducer, useRef, useState } from "react";
 import { Slider, TextField, Tooltip, Typography } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 import { useQueryState } from "nuqs";
@@ -113,8 +113,15 @@ const useFitState = () => {
   const [state, dispatch] = useReducer(reducer, initialData);
   const debouncedState = useDebounce(state, 250);
   const [inputError, setInputError] = useState<string | null>(null);
+  const lastInUrlRef = useRef<FitState | null | undefined>(inUrl);
 
   useEffect(() => {
+    if (lastInUrlRef.current === inUrl) {
+      return;
+    }
+
+    lastInUrlRef.current = inUrl;
+
     if (!inUrl) {
       return;
     }
