@@ -1,15 +1,28 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as nuqs from "nuqs";
+import type { UseQueryStateReturn } from "nuqs";
+import type { FitState } from "./types";
 
 import FitCalculator from "./FitCalculator";
 
-const mockSetQueryState = jest.fn();
+type SetQueryState = UseQueryStateReturn<FitState | null, undefined>[1];
 
-jest.mock("nuqs", () => ({
-  createParser: jest.fn((options) => options),
-  useQueryState: jest.fn(() => [null, mockSetQueryState]),
-}));
+const mockSetQueryState: jest.MockedFunction<SetQueryState> = jest.fn(() =>
+  Promise.resolve(new URLSearchParams())
+);
+
+jest.mock("nuqs", () => {
+  const actual = jest.requireActual("nuqs");
+
+  return {
+    __esModule: true,
+    ...actual,
+    useQueryState: jest.fn(
+      () => [null, mockSetQueryState] as UseQueryStateReturn<FitState | null, undefined>
+    ),
+  };
+});
 
 describe("FitCalculator", () => {
   beforeEach(() => {
