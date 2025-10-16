@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as nuqs from "nuqs";
-import { expect } from "@jest/globals";
 
 import FitCalculator from "./FitCalculator";
 
@@ -32,5 +31,41 @@ describe("FitCalculator", () => {
 
     expect((frameStackInput as HTMLInputElement).value).toBe("45");
     expect(mockSetQueryState).toHaveBeenCalled();
+  });
+
+  it("hydrates state from url query", () => {
+    const parsedState = {
+      stemXOrigin: 123,
+      stemYOrigin: 456,
+      spacer: 62,
+      stem: 120,
+      angleHt: 73,
+      angleStem: 0,
+      stack: "",
+      reach: "",
+      handlebarStack: "",
+      handlebarReach: "",
+      name: "Loaded from URL",
+    };
+
+    jest
+      .spyOn(nuqs, "useQueryState")
+      .mockReturnValueOnce([parsedState, mockSetQueryState]);
+
+    render(<FitCalculator />);
+
+    expect(screen.getByDisplayValue("Loaded from URL")).toBeInTheDocument();
+    expect(screen.getByRole("slider", { name: /spacer/i })).toHaveValue(
+      parsedState.spacer
+    );
+    expect(screen.getByRole("slider", { name: /stem slider/i })).toHaveValue(
+      parsedState.stem
+    );
+    expect(screen.getByRole("slider", { name: /angleht slider/i })).toHaveValue(
+      parsedState.angleHt
+    );
+    expect(
+      screen.getByRole("slider", { name: /anglestem slider/i })
+    ).toHaveValue(parsedState.angleStem);
   });
 });

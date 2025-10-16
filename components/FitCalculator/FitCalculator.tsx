@@ -62,6 +62,31 @@ const reducer = (state: FitState, action: FitReducerAction): FitState => {
   }
 };
 
+const FIT_STATE_KEYS: Array<keyof FitState> = [
+  "stemXOrigin",
+  "stemYOrigin",
+  "spacer",
+  "stem",
+  "angleHt",
+  "angleStem",
+  "stack",
+  "reach",
+  "handlebarStack",
+  "handlebarReach",
+  "name",
+];
+
+const areFitStatesEqual = (
+  a: FitState | null | undefined,
+  b: FitState | null | undefined
+) => {
+  if (!a || !b) {
+    return false;
+  }
+
+  return FIT_STATE_KEYS.every((key) => a[key] === b[key]);
+};
+
 const useScrollRestoration = () => {
   useLayoutEffect(() => {
     if (typeof window === "undefined") {
@@ -90,13 +115,32 @@ const useFitState = () => {
   const [inputError, setInputError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!inUrl) {
+      return;
+    }
+
+    if (areFitStatesEqual(inUrl, state)) {
+      return;
+    }
+
+    dispatch({
+      type: "replace",
+      payload: inUrl,
+    });
+  }, [inUrl, state]);
+
+  useEffect(() => {
     if (typeof window === "undefined") {
+      return;
+    }
+
+    if (inUrl && areFitStatesEqual(debouncedState, inUrl)) {
       return;
     }
 
     window.sessionStorage.setItem("scrollPosition", window.scrollY.toString());
     void setInUrl(debouncedState);
-  }, [debouncedState, setInUrl]);
+  }, [debouncedState, inUrl, setInUrl]);
 
   return {
     state,
