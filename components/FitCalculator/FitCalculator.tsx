@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useReducer, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useReducer, useState } from "react";
 import { Slider, TextField, Tooltip, Typography } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 import { useQueryState } from "nuqs";
@@ -56,7 +56,9 @@ const reducer = (state: FitState, action: FitReducerAction): FitState => {
       };
     }
     case "replace":
-      return { ...action.payload };
+      return areFitStatesEqual(state, action.payload)
+        ? state
+        : { ...action.payload };
     default:
       return state;
   }
@@ -113,20 +115,9 @@ const useFitState = () => {
   const [state, dispatch] = useReducer(reducer, initialData);
   const debouncedState = useDebounce(state, 250);
   const [inputError, setInputError] = useState<string | null>(null);
-  const lastInUrlRef = useRef<FitState | null | undefined>(inUrl);
 
   useEffect(() => {
-    if (lastInUrlRef.current === inUrl) {
-      return;
-    }
-
-    lastInUrlRef.current = inUrl;
-
     if (!inUrl) {
-      return;
-    }
-
-    if (areFitStatesEqual(inUrl, state)) {
       return;
     }
 
@@ -134,7 +125,7 @@ const useFitState = () => {
       type: "replace",
       payload: inUrl,
     });
-  }, [inUrl, state]);
+  }, [inUrl]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
