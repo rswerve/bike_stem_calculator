@@ -18,7 +18,8 @@ const mockSetQueryState = jest.fn<
   Parameters<SetFitQueryState>
 >(() => Promise.resolve(new URLSearchParams()));
 
-const useQueryStateMock: jest.Mock<FitQueryState, [string, unknown?]> = jest.fn();
+const useQueryStateMock: jest.Mock<FitQueryState, [string, unknown?]> =
+  jest.fn();
 
 jest.mock("nuqs", () => {
   const actual = jest.requireActual("nuqs");
@@ -77,13 +78,20 @@ it("renders and syncs inputs to query state", async () => {
 });
 
 it("hydrates state from url query", () => {
-  useQueryStateMock.mockReturnValueOnce([parsedStateFixture, mockSetQueryState]);
+  useQueryStateMock.mockReturnValueOnce([
+    parsedStateFixture,
+    mockSetQueryState,
+  ]);
 
   render(<FitCalculator />);
 
   expect(screen.getByDisplayValue("Loaded from URL")).toBeDefined();
   expect(getSlider(/spacer/i).valueAsNumber).toBe(parsedStateFixture.spacer);
   expect(getSlider(/stem slider/i).valueAsNumber).toBe(parsedStateFixture.stem);
-  expect(getSlider(/angleht slider/i).valueAsNumber).toBe(parsedStateFixture.angleHt);
-  expect(getSlider(/anglestem slider/i).valueAsNumber).toBe(parsedStateFixture.angleStem);
+  expect(getSlider(/angleht slider/i).valueAsNumber).toBe(
+    parsedStateFixture.angleHt
+  );
+  expect(getSlider(/anglestem slider/i).valueAsNumber).toBe(
+    parsedStateFixture.angleStem
+  );
 });
