@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useReducer, useState } from "react";
+import { useEffect, useLayoutEffect, useReducer, useRef, useState } from "react";
 import { Slider, TextField, Tooltip, Typography } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 import { useQueryState } from "nuqs";
@@ -47,23 +47,6 @@ const stemAngleTooltip: TooltipContent = (
   </Typography>
 );
 
-const reducer = (state: FitState, action: FitReducerAction): FitState => {
-  switch (action.type) {
-    case "update": {
-      return {
-        ...state,
-        [action.field]: action.value,
-      };
-    }
-    case "replace":
-      return areFitStatesEqual(state, action.payload)
-        ? state
-        : { ...action.payload };
-    default:
-      return state;
-  }
-};
-
 const FIT_STATE_KEYS: Array<keyof FitState> = [
   "stemXOrigin",
   "stemYOrigin",
@@ -87,6 +70,23 @@ const areFitStatesEqual = (
   }
 
   return FIT_STATE_KEYS.every((key) => a[key] === b[key]);
+};
+
+const reducer = (state: FitState, action: FitReducerAction): FitState => {
+  switch (action.type) {
+    case "update": {
+      return {
+        ...state,
+        [action.field]: action.value,
+      };
+    }
+    case "replace":
+      return areFitStatesEqual(state, action.payload)
+        ? state
+        : { ...action.payload };
+    default:
+      return state;
+  }
 };
 
 const useScrollRestoration = () => {
@@ -115,8 +115,15 @@ const useFitState = () => {
   const [state, dispatch] = useReducer(reducer, initialData);
   const debouncedState = useDebounce(state, 250);
   const [inputError, setInputError] = useState<string | null>(null);
+  const lastInUrlRef = useRef<FitState | null | undefined>(inUrl);
 
   useEffect(() => {
+    if (lastInUrlRef.current === inUrl) {
+      return;
+    }
+
+    lastInUrlRef.current = inUrl;
+
     if (!inUrl) {
       return;
     }
@@ -125,7 +132,7 @@ const useFitState = () => {
       type: "replace",
       payload: inUrl,
     });
-  }, [inUrl]);
+  }, [inUrl, state]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
