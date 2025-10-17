@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useReducer, useState } from "react";
+import { useEffect, useLayoutEffect, useReducer, useRef, useState } from "react";
 import { Slider, TextField, Tooltip, Typography } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 import { useQueryState } from "nuqs";
@@ -88,9 +88,17 @@ const useFitState = () => {
   const [state, dispatch] = useReducer(reducer, initialData);
   const debouncedState = useDebounce(state, 250);
   const [inputError, setInputError] = useState<string | null>(null);
+  const isFirstRenderRef = useRef(true);
 
   useEffect(() => {
     if (typeof window === "undefined") {
+      return;
+    }
+
+    // Skip writing to URL on first render to avoid overwriting URL state
+    // before nuqs has finished parsing
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false;
       return;
     }
 

@@ -80,24 +80,28 @@ it("hydrates state from url query on initial render", () => {
   mockUseQueryState.mockReturnValue([parsedStateFixture, mockSetQueryState]);
 
   render(<FitCalculator />);
-
+ 
   // Check that the name field has the loaded value
   const nameInput = screen.getByDisplayValue("Loaded from URL");
   expect(nameInput).toBeDefined();
-
+ 
   // Check that sliders have the loaded values (aria-labels use underscores)
   const spacerSlider = getSlider("spacer_slider");
   expect(spacerSlider.valueAsNumber).toBe(62);
-
+ 
   const stemSlider = getSlider("stem_slider");
   expect(stemSlider.valueAsNumber).toBe(120);
-
+ 
   const angleHtSlider = getSlider("angleht_slider");
   expect(angleHtSlider.valueAsNumber).toBe(73);
-
+ 
   const angleStemSlider = getSlider("anglestem_slider");
   expect(angleStemSlider.valueAsNumber).toBe(0);
-
+ 
   // Verify the mock was called with the right key
   expect(mockUseQueryState).toHaveBeenCalledWith("urlstate", expect.anything());
+  
+  // CRITICAL: Verify that setInUrl was NOT called on initial render
+  // This prevents overwriting URL state before nuqs finishes parsing
+  expect(mockSetQueryState).not.toHaveBeenCalled();
 });
