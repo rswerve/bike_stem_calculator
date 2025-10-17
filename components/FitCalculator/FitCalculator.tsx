@@ -47,31 +47,6 @@ const stemAngleTooltip: TooltipContent = (
   </Typography>
 );
 
-const FIT_STATE_KEYS: Array<keyof FitState> = [
-  "stemXOrigin",
-  "stemYOrigin",
-  "spacer",
-  "stem",
-  "angleHt",
-  "angleStem",
-  "stack",
-  "reach",
-  "handlebarStack",
-  "handlebarReach",
-  "name",
-];
-
-const areFitStatesEqual = (
-  a: FitState | null | undefined,
-  b: FitState | null | undefined
-) => {
-  if (!a || !b) {
-    return false;
-  }
-
-  return FIT_STATE_KEYS.every((key) => a[key] === b[key]);
-};
-
 const reducer = (state: FitState, action: FitReducerAction): FitState => {
   switch (action.type) {
     case "update": {
@@ -113,17 +88,6 @@ const useFitState = () => {
   const [state, dispatch] = useReducer(reducer, initialData);
   const debouncedState = useDebounce(state, 250);
   const [inputError, setInputError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!inUrl) {
-      return;
-    }
-
-    dispatch({
-      type: "replace",
-      payload: inUrl,
-    });
-  }, [inUrl]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
