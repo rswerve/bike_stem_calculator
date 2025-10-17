@@ -89,13 +89,6 @@ const useFitState = () => {
   const debouncedState = useDebounce(state, 250);
   const [inputError, setInputError] = useState<string | null>(null);
 
-  // Debug logging
-  useEffect(() => {
-    console.log("useFitState - inUrl:", inUrl);
-    console.log("useFitState - initialData:", initialData);
-    console.log("useFitState - state:", state);
-  }, [inUrl, initialData, state]);
-
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
