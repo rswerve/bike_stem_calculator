@@ -91,17 +91,17 @@ const useFitState = () => {
     if (typeof window === "undefined") {
       return INITIAL_FIT_STATE;
     }
-    
+
     const urlParams = new URLSearchParams(window.location.search);
     const urlstateParam = urlParams.get("urlstate");
-    
+
     if (urlstateParam) {
       const parsed = fitStateParser.parse(urlstateParam);
       if (parsed) {
         return parsed;
       }
     }
-    
+
     return INITIAL_FIT_STATE;
   };
 

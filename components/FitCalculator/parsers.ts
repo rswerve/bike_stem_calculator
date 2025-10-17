@@ -38,28 +38,19 @@ const parseFitState = (
   value: string | null,
   fallback: FitStateParserOptions["fallback"]
 ) => {
-  console.log("[Parser] Parsing value:", value);
-
   if (!value) {
-    console.log("[Parser] No value, returning fallback:", fallback);
     return fallback ?? null;
   }
 
   try {
     const parsed = JSON.parse(value);
-    console.log("[Parser] JSON parsed:", parsed);
-
     if (isFitState(parsed)) {
-      console.log("[Parser] Validation passed, returning:", parsed);
       return parsed;
     }
-
-    console.log("[Parser] Validation FAILED");
   } catch (error) {
-    console.warn("[Parser] Invalid fit state in query string", error);
+    console.warn("Invalid fit state in query string", error);
   }
 
-  console.log("[Parser] Returning fallback:", fallback);
   return fallback ?? null;
 };
 

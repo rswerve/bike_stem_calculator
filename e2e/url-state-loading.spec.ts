@@ -134,4 +134,58 @@ test.describe("URL State Loading", () => {
     expect(url).toContain("stem");
     expect(url).toContain("110");
   });
+
+  test("should update URL when sliders are changed from existing state", async ({
+    page,
+  }) => {
+    // Start with existing URL state
+    const initialState = {
+      stemXOrigin: 100,
+      stemYOrigin: 200,
+      spacer: 40,
+      stem: 100,
+      angleHt: 73,
+      angleStem: 0,
+      stack: "",
+      reach: "",
+      handlebarStack: "",
+      handlebarReach: "",
+      name: "Test Config",
+    };
+
+    const encodedState = encodeURIComponent(JSON.stringify(initialState));
+    await page.goto(`/?urlstate=${encodedState}`);
+    await page.waitForLoadState("networkidle");
+
+    // Modify multiple sliders
+    const spacerSlider = page.getByRole("slider", { name: "spacer_slider" });
+    await spacerSlider.fill("65");
+
+    const stemSlider = page.getByRole("slider", {
+      name: "stem_slider",
+      exact: true,
+    });
+    await stemSlider.fill("120");
+
+    const angleHtSlider = page.getByRole("slider", { name: "angleht_slider" });
+    await angleHtSlider.fill("74.5");
+
+    // Wait for debounce
+    await page.waitForTimeout(400);
+
+    // Verify URL was updated with ALL changes
+    const url = page.url();
+    expect(url).toContain("urlstate=");
+
+    // Decode and parse the URL state
+    const urlParams = new URL(url).searchParams;
+    const urlState = urlParams.get("urlstate");
+    expect(urlState).toBeTruthy();
+
+    const parsedState = JSON.parse(urlState!);
+    expect(parsedState.spacer).toBe(65);
+    expect(parsedState.stem).toBe(120);
+    expect(parsedState.angleHt).toBe(74.5);
+    expect(parsedState.name).toBe("Test Config"); // Should preserve name
+  });
 });
