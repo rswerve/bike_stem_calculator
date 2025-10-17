@@ -84,29 +84,58 @@ const useUrlState = () =>
 
 const useFitState = () => {
   const [inUrl, setInUrl] = useUrlState();
-  const initialData = inUrl ?? INITIAL_FIT_STATE;
+  const [hasMounted, setHasMounted] = useState(false);
+
+  // CRITICAL FIX: Manually parse URL on first render to bypass nuqs timing issues
+  const getInitialState = (): FitState => {
+    if (typeof window === "undefined") {
+      return INITIAL_FIT_STATE;
+    }
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlstateParam = urlParams.get("urlstate");
+    
+    if (urlstateParam) {
+      const parsed = fitStateParser.parse(urlstateParam);
+      if (parsed) {
+        return parsed;
+      }
+    }
+    
+    return INITIAL_FIT_STATE;
+  };
+
+  const initialData = getInitialState();
   const [state, dispatch] = useReducer(reducer, initialData);
   const debouncedState = useDebounce(state, 250);
   const [inputError, setInputError] = useState<string | null>(null);
 
-  // Sync URL changes back to state (e.g., when nuqs finishes parsing)
+  // Mark as mounted after first render
   useEffect(() => {
-    if (inUrl) {
-      dispatch({
-        type: "replace",
-        payload: inUrl,
-      });
-    }
-  }, [inUrl]);
+    setHasMounted(true);
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
 
+    // Skip write-back until after mount
+    if (!hasMounted) {
+      return;
+    }
+
+    // If there was a URL param initially, wait for nuqs to parse it first
+    const urlParams = new URLSearchParams(window.location.search);
+    const hadUrlParam = urlParams.has("urlstate");
+
+    if (inUrl === null && hadUrlParam) {
+      return;
+    }
+
     window.sessionStorage.setItem("scrollPosition", window.scrollY.toString());
     void setInUrl(debouncedState);
-  }, [debouncedState, setInUrl]);
+  }, [debouncedState, setInUrl, hasMounted, inUrl]);
 
   return {
     state,
