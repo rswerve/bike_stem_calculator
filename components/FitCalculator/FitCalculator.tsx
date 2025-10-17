@@ -129,7 +129,7 @@ const useFitState = () => {
       type: "replace",
       payload: inUrl,
     });
-  }, [inUrl]);
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") {
