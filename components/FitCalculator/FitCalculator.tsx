@@ -89,6 +89,16 @@ const useFitState = () => {
   const debouncedState = useDebounce(state, 250);
   const [inputError, setInputError] = useState<string | null>(null);
 
+  // Sync URL changes back to state (e.g., when nuqs finishes parsing)
+  useEffect(() => {
+    if (inUrl) {
+      dispatch({
+        type: "replace",
+        payload: inUrl,
+      });
+    }
+  }, [inUrl]);
+
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
