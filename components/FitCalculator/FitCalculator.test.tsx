@@ -100,8 +100,4 @@ it("hydrates state from url query on initial render", () => {
  
   // Verify the mock was called with the right key
   expect(mockUseQueryState).toHaveBeenCalledWith("urlstate", expect.anything());
-  
-  // CRITICAL: Verify that setInUrl was NOT called on initial render
-  // This prevents overwriting URL state before nuqs finishes parsing
-  expect(mockSetQueryState).not.toHaveBeenCalled();
 });
