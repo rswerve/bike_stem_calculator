@@ -18,16 +18,20 @@ const mockSetQueryState = jest.fn<
   Parameters<SetFitQueryState>
 >(() => Promise.resolve(new URLSearchParams()));
 
-const useQueryStateMock: jest.Mock<FitQueryState, [string, unknown?]> =
-  jest.fn();
+// Create a mock that can be accessed after jest.mock() hoisting
+let useQueryStateMock: jest.Mock<FitQueryState, [string, unknown?]>;
 
 jest.mock("nuqs", () => {
   const actual = jest.requireActual("nuqs");
+  const mockFn = jest.fn();
+  
+  // Assign to the outer variable so tests can access it
+  useQueryStateMock = mockFn as jest.Mock<FitQueryState, [string, unknown?]>;
 
   return {
     __esModule: true,
     ...actual,
-    useQueryState: useQueryStateMock,
+    useQueryState: mockFn,
   };
 });
 
@@ -77,21 +81,29 @@ it("renders and syncs inputs to query state", async () => {
   expect(mockSetQueryState).toHaveBeenCalled();
 });
 
-it("hydrates state from url query", () => {
-  useQueryStateMock.mockReturnValueOnce([
-    parsedStateFixture,
-    mockSetQueryState,
-  ]);
+it("hydrates state from url query on initial render", () => {
+  // Mock useQueryState to return the parsed state BEFORE render
+  useQueryStateMock.mockReturnValue([parsedStateFixture, mockSetQueryState]);
 
-  render(<FitCalculator />);
+  const { container } = render(<FitCalculator />);
 
-  expect(screen.getByDisplayValue("Loaded from URL")).toBeDefined();
-  expect(getSlider(/spacer/i).valueAsNumber).toBe(parsedStateFixture.spacer);
-  expect(getSlider(/stem slider/i).valueAsNumber).toBe(parsedStateFixture.stem);
-  expect(getSlider(/angleht slider/i).valueAsNumber).toBe(
-    parsedStateFixture.angleHt
-  );
-  expect(getSlider(/anglestem slider/i).valueAsNumber).toBe(
-    parsedStateFixture.angleStem
-  );
+  // Check that the name field has the loaded value
+  const nameInput = screen.getByDisplayValue("Loaded from URL");
+  expect(nameInput).toBeDefined();
+
+  // Check that sliders have the loaded values
+  const spacerSlider = getSlider(/spacer/i);
+  expect(spacerSlider.valueAsNumber).toBe(62);
+
+  const stemSlider = getSlider(/stem slider/i);
+  expect(stemSlider.valueAsNumber).toBe(120);
+
+  const angleHtSlider = getSlider(/angleht slider/i);
+  expect(angleHtSlider.valueAsNumber).toBe(73);
+
+  const angleStemSlider = getSlider(/anglestem slider/i);
+  expect(angleStemSlider.valueAsNumber).toBe(0);
+
+  // Verify the mock was called with the right key
+  expect(useQueryStateMock).toHaveBeenCalledWith("urlstate", expect.anything());
 });
