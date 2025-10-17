@@ -81,9 +81,7 @@ const reducer = (state: FitState, action: FitReducerAction): FitState => {
       };
     }
     case "replace":
-      return areFitStatesEqual(state, action.payload)
-        ? state
-        : { ...action.payload };
+      return { ...action.payload };
     default:
       return state;
   }
@@ -129,10 +127,6 @@ const useFitState = () => {
 
   useEffect(() => {
     if (typeof window === "undefined") {
-      return;
-    }
-
-    if (inUrl && areFitStatesEqual(debouncedState, inUrl)) {
       return;
     }
 
