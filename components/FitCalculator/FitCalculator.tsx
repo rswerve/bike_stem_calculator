@@ -121,15 +121,11 @@ const useFitState = () => {
       return;
     }
 
-    if (areFitStatesEqual(inUrl, state)) {
-      return;
-    }
-
     dispatch({
       type: "replace",
       payload: inUrl,
     });
-  }, []);
+  }, [inUrl]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -142,7 +138,7 @@ const useFitState = () => {
 
     window.sessionStorage.setItem("scrollPosition", window.scrollY.toString());
     void setInUrl(debouncedState);
-  }, [debouncedState, inUrl, setInUrl]);
+  }, [debouncedState, setInUrl]);
 
   return {
     state,
