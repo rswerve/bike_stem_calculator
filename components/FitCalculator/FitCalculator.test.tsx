@@ -79,23 +79,23 @@ it("hydrates state from url query on initial render", () => {
   // Mock useQueryState to return the parsed state BEFORE render
   mockUseQueryState.mockReturnValue([parsedStateFixture, mockSetQueryState]);
 
-  const { container } = render(<FitCalculator />);
+  render(<FitCalculator />);
  
   // Check that the name field has the loaded value
   const nameInput = screen.getByDisplayValue("Loaded from URL");
   expect(nameInput).toBeDefined();
  
-  // Check that sliders have the loaded values
-  const spacerSlider = getSlider(/spacer/i);
+  // Check that sliders have the loaded values (aria-labels use underscores)
+  const spacerSlider = getSlider("spacer_slider");
   expect(spacerSlider.valueAsNumber).toBe(62);
  
-  const stemSlider = getSlider(/stem slider/i);
+  const stemSlider = getSlider("stem_slider");
   expect(stemSlider.valueAsNumber).toBe(120);
  
-  const angleHtSlider = getSlider(/angleht slider/i);
+  const angleHtSlider = getSlider("angleht_slider");
   expect(angleHtSlider.valueAsNumber).toBe(73);
  
-  const angleStemSlider = getSlider(/anglestem slider/i);
+  const angleStemSlider = getSlider("anglestem_slider");
   expect(angleStemSlider.valueAsNumber).toBe(0);
  
   // Verify the mock was called with the right key
