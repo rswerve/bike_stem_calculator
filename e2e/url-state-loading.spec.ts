@@ -328,8 +328,8 @@ test.describe("URL State Loading", () => {
     await page.goto(`/?urlstate=${encodedState}`);
     await page.waitForLoadState("networkidle");
 
-    // Wait for React hydration
-    await page.waitForTimeout(500);
+    // Wait longer for React hydration AND debounce effect (250ms + buffer)
+    await page.waitForTimeout(1000);
 
     // Check for parser errors
     const hasParserError = consoleMessages.some((msg) =>
