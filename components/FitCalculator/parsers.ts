@@ -18,13 +18,11 @@ const parseFitState = (
   fallback: FitStateParserOptions["fallback"]
 ) => {
   if (!value) {
-    console.log("[Parser] No value to parse, returning fallback");
     return fallback ?? null;
   }
 
   try {
     const parsed = JSON.parse(value);
-    console.log("[Parser] Parsed URL state:", parsed);
 
     // Accept any object and build a valid FitState from it
     if (parsed && typeof parsed === "object") {
@@ -47,7 +45,6 @@ const parseFitState = (
         result.handlebarReach = parsed.handlebarReach;
       if (typeof parsed.name === "string") result.name = parsed.name;
 
-      console.log("[Parser] Returning parsed result:", result);
       return result;
     }
   } catch (error) {
