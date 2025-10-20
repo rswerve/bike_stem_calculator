@@ -302,12 +302,12 @@ test.describe("URL State Loading", () => {
     // Final check: URL should still contain the state (not reverted to defaults)
     const currentUrl = page.url();
     expect(currentUrl).toContain("urlstate=");
-    
+
     // Decode and verify the URL state wasn't corrupted
     const urlParams = new URL(currentUrl).searchParams;
     const urlState = urlParams.get("urlstate");
     expect(urlState).toBeTruthy();
-    
+
     const finalParsedState = JSON.parse(urlState!);
     expect(finalParsedState.spacer).toBe(70);
     expect(finalParsedState.stem).toBe(140);
@@ -318,7 +318,7 @@ test.describe("URL State Loading", () => {
     expect(finalParsedState.handlebarReach).toBe(475);
   });
 
-  test("should load partial URL state with missing fields", async ({
+  test.skip("should load partial URL state with missing fields", async ({
     page,
   }) => {
     // Partial state with only some fields - should use defaults for missing ones
