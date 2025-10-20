@@ -1,6 +1,7 @@
 import { createParser } from "nuqs";
 
 import { FitState } from "./types";
+import { INITIAL_FIT_STATE } from "./constants";
 
 type FitStateParserOptions = {
   fallback?: FitState | null;
@@ -12,28 +13,6 @@ const isNumeric = (value: unknown): value is number =>
 const isNumericOrEmpty = (value: unknown): value is number | "" =>
   value === "" || isNumeric(value);
 
-const isFitState = (value: unknown): value is FitState => {
-  if (!value || typeof value !== "object") {
-    return false;
-  }
-
-  const candidate = value as Partial<FitState>;
-
-  return (
-    isNumeric(candidate.stemXOrigin) &&
-    isNumeric(candidate.stemYOrigin) &&
-    isNumeric(candidate.spacer) &&
-    isNumeric(candidate.stem) &&
-    isNumeric(candidate.angleHt) &&
-    isNumeric(candidate.angleStem) &&
-    isNumericOrEmpty(candidate.stack) &&
-    isNumericOrEmpty(candidate.reach) &&
-    isNumericOrEmpty(candidate.handlebarStack) &&
-    isNumericOrEmpty(candidate.handlebarReach) &&
-    typeof candidate.name === "string"
-  );
-};
-
 const parseFitState = (
   value: string | null,
   fallback: FitStateParserOptions["fallback"]
@@ -44,8 +23,29 @@ const parseFitState = (
 
   try {
     const parsed = JSON.parse(value);
-    if (isFitState(parsed)) {
-      return parsed;
+
+    // Accept any object and build a valid FitState from it
+    if (parsed && typeof parsed === "object") {
+      const result: FitState = { ...INITIAL_FIT_STATE };
+
+      // For each field, use the parsed value if valid, otherwise keep default
+      if (isNumeric(parsed.stemXOrigin))
+        result.stemXOrigin = parsed.stemXOrigin;
+      if (isNumeric(parsed.stemYOrigin))
+        result.stemYOrigin = parsed.stemYOrigin;
+      if (isNumeric(parsed.spacer)) result.spacer = parsed.spacer;
+      if (isNumeric(parsed.stem)) result.stem = parsed.stem;
+      if (isNumeric(parsed.angleHt)) result.angleHt = parsed.angleHt;
+      if (isNumeric(parsed.angleStem)) result.angleStem = parsed.angleStem;
+      if (isNumericOrEmpty(parsed.stack)) result.stack = parsed.stack;
+      if (isNumericOrEmpty(parsed.reach)) result.reach = parsed.reach;
+      if (isNumericOrEmpty(parsed.handlebarStack))
+        result.handlebarStack = parsed.handlebarStack;
+      if (isNumericOrEmpty(parsed.handlebarReach))
+        result.handlebarReach = parsed.handlebarReach;
+      if (typeof parsed.name === "string") result.name = parsed.name;
+
+      return result;
     }
   } catch (error) {
     console.warn("Invalid fit state in query string", error);
