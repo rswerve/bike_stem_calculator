@@ -240,13 +240,31 @@ test.describe("URL State Loading", () => {
   }) => {
     // This is an ACTUAL old production URL that was failing
     // From: https://www.bikestem.fit/?urlstate=%7B%22stemXOrigin%22%3A100%2C%22stemYOrigin%22%3A200%2C%22spacer%22%3A70%2C%22stem%22%3A140%2C%22angleHt%22%3A73%2C%22angleStem%22%3A37%2C%22stack%22%3A565%2C%22reach%22%3A383%2C%22handlebarStack%22%3A717%2C%22handlebarReach%22%3A475%2C%22input%22%3A%22angleStem%22%2C%22value%22%3A37%7D
+
+    // Capture console output to detect parsing errors
+    const consoleMessages: string[] = [];
+    page.on("console", (msg) => {
+      const text = msg.text();
+      consoleMessages.push(text);
+      console.log("BROWSER:", text);
+    });
+
     const realOldUrl =
       "/?urlstate=%7B%22stemXOrigin%22%3A100%2C%22stemYOrigin%22%3A200%2C%22spacer%22%3A70%2C%22stem%22%3A140%2C%22angleHt%22%3A73%2C%22angleStem%22%3A37%2C%22stack%22%3A565%2C%22reach%22%3A383%2C%22handlebarStack%22%3A717%2C%22handlebarReach%22%3A475%2C%22input%22%3A%22angleStem%22%2C%22value%22%3A37%7D";
 
     await page.goto(realOldUrl);
     await page.waitForLoadState("networkidle");
 
-    // Verify ALL slider values match the exact URL
+    // Wait a bit more to ensure React has fully hydrated
+    await page.waitForTimeout(500);
+
+    // Ensure no parser warnings/errors
+    const hasParserError = consoleMessages.some((msg) =>
+      msg.includes("Invalid fit state")
+    );
+    expect(hasParserError).toBe(false);
+
+    // Verify ALL slider values match the exact URL data
     const spacerSlider = page.getByRole("slider", { name: "spacer_slider" });
     await expect(spacerSlider).toHaveValue("70");
 
@@ -264,15 +282,11 @@ test.describe("URL State Loading", () => {
     });
     await expect(angleStemSlider).toHaveValue("37");
 
-    // Verify text inputs
-    const stackInput = page
-      .locator('input[name="stack"]')
-      .first(); // Get frame stack
+    // Verify text input fields (these are critical for the full configuration)
+    const stackInput = page.locator('input[name="stack"]');
     await expect(stackInput).toHaveValue("565");
 
-    const reachInput = page
-      .locator('input[name="reach"]')
-      .first(); // Get frame reach
+    const reachInput = page.locator('input[name="reach"]');
     await expect(reachInput).toHaveValue("383");
 
     const handlebarStackInput = page.locator('input[name="handlebarStack"]');
@@ -284,6 +298,13 @@ test.describe("URL State Loading", () => {
     // Verify name field defaults to empty (no name in old format)
     const nameInput = page.locator('input[name="name"]');
     await expect(nameInput).toHaveValue("");
+
+    // Final check: URL should still contain the state (not reverted to defaults)
+    const currentUrl = page.url();
+    expect(currentUrl).toContain("urlstate=");
+    expect(currentUrl).toContain("70"); // spacer value
+    expect(currentUrl).toContain("140"); // stem value
+    expect(currentUrl).toContain("37"); // angleStem value
   });
 
   test("should load partial URL state with missing fields", async ({
