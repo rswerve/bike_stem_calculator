@@ -25,7 +25,8 @@ jest.mock("nuqs", () => {
   return {
     __esModule: true,
     ...actual,
-    useQueryState: (...args: any[]) => mockUseQueryState(...args),
+    useQueryState: (...args: Parameters<typeof mockUseQueryState>) =>
+      mockUseQueryState(...args),
   };
 });
 
