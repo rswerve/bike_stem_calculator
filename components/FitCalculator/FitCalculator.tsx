@@ -89,23 +89,28 @@ const useFitState = () => {
   // CRITICAL FIX: Manually parse URL on first render to bypass nuqs timing issues
   const getInitialState = (): FitState => {
     if (typeof window === "undefined") {
+      console.log("[useFitState] SSR mode, returning INITIAL_FIT_STATE");
       return INITIAL_FIT_STATE;
     }
 
     const urlParams = new URLSearchParams(window.location.search);
     const urlstateParam = urlParams.get("urlstate");
+    console.log("[useFitState] URL param:", urlstateParam?.substring(0, 100) + "...");
 
     if (urlstateParam) {
       const parsed = fitStateParser.parse(urlstateParam);
       if (parsed) {
+        console.log("[useFitState] Using parsed state as initial state");
         return parsed;
       }
     }
 
+    console.log("[useFitState] No valid URL state, using INITIAL_FIT_STATE");
     return INITIAL_FIT_STATE;
   };
 
   const initialData = getInitialState();
+  console.log("[useFitState] Initial data set to:", initialData);
   const [state, dispatch] = useReducer(reducer, initialData);
   const debouncedState = useDebounce(state, 250);
   const [inputError, setInputError] = useState<string | null>(null);
@@ -122,6 +127,7 @@ const useFitState = () => {
 
     // Skip write-back until after mount
     if (!hasMounted) {
+      console.log("[URL Effect] Skipping - not mounted yet");
       return;
     }
 
@@ -130,9 +136,15 @@ const useFitState = () => {
     const hadUrlParam = urlParams.has("urlstate");
 
     if (inUrl === null && hadUrlParam) {
+      console.log("[URL Effect] Skipping - waiting for nuqs to parse URL param");
       return;
     }
 
+    console.log("[URL Effect] Writing debounced state to URL:", {
+      spacer: debouncedState.spacer,
+      stem: debouncedState.stem,
+      name: debouncedState.name,
+    });
     window.sessionStorage.setItem("scrollPosition", window.scrollY.toString());
     void setInUrl(debouncedState);
   }, [debouncedState, setInUrl, hasMounted, inUrl]);
