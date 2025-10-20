@@ -317,9 +317,25 @@ test.describe("URL State Loading", () => {
       name: "Partial",
     };
 
+    const consoleMessages: string[] = [];
+    page.on("console", (msg) => {
+      const text = msg.text();
+      consoleMessages.push(text);
+      console.log("BROWSER:", text);
+    });
+
     const encodedState = encodeURIComponent(JSON.stringify(partialState));
     await page.goto(`/?urlstate=${encodedState}`);
     await page.waitForLoadState("networkidle");
+
+    // Wait for React hydration
+    await page.waitForTimeout(500);
+
+    // Check for parser errors
+    const hasParserError = consoleMessages.some((msg) =>
+      msg.includes("Invalid fit state")
+    );
+    expect(hasParserError).toBe(false);
 
     // Verify provided fields loaded
     const spacerSlider = page.getByRole("slider", { name: "spacer_slider" });
