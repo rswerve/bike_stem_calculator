@@ -235,6 +235,57 @@ test.describe("URL State Loading", () => {
     await expect(nameInput).toHaveValue("");
   });
 
+  test("should load REAL production old URL format (rigorous test)", async ({
+    page,
+  }) => {
+    // This is an ACTUAL old production URL that was failing
+    // From: https://www.bikestem.fit/?urlstate=%7B%22stemXOrigin%22%3A100%2C%22stemYOrigin%22%3A200%2C%22spacer%22%3A70%2C%22stem%22%3A140%2C%22angleHt%22%3A73%2C%22angleStem%22%3A37%2C%22stack%22%3A565%2C%22reach%22%3A383%2C%22handlebarStack%22%3A717%2C%22handlebarReach%22%3A475%2C%22input%22%3A%22angleStem%22%2C%22value%22%3A37%7D
+    const realOldUrl =
+      "/?urlstate=%7B%22stemXOrigin%22%3A100%2C%22stemYOrigin%22%3A200%2C%22spacer%22%3A70%2C%22stem%22%3A140%2C%22angleHt%22%3A73%2C%22angleStem%22%3A37%2C%22stack%22%3A565%2C%22reach%22%3A383%2C%22handlebarStack%22%3A717%2C%22handlebarReach%22%3A475%2C%22input%22%3A%22angleStem%22%2C%22value%22%3A37%7D";
+
+    await page.goto(realOldUrl);
+    await page.waitForLoadState("networkidle");
+
+    // Verify ALL slider values match the exact URL
+    const spacerSlider = page.getByRole("slider", { name: "spacer_slider" });
+    await expect(spacerSlider).toHaveValue("70");
+
+    const stemSlider = page.getByRole("slider", {
+      name: "stem_slider",
+      exact: true,
+    });
+    await expect(stemSlider).toHaveValue("140");
+
+    const angleHtSlider = page.getByRole("slider", { name: "angleht_slider" });
+    await expect(angleHtSlider).toHaveValue("73");
+
+    const angleStemSlider = page.getByRole("slider", {
+      name: "anglestem_slider",
+    });
+    await expect(angleStemSlider).toHaveValue("37");
+
+    // Verify text inputs
+    const stackInput = page
+      .locator('input[name="stack"]')
+      .first(); // Get frame stack
+    await expect(stackInput).toHaveValue("565");
+
+    const reachInput = page
+      .locator('input[name="reach"]')
+      .first(); // Get frame reach
+    await expect(reachInput).toHaveValue("383");
+
+    const handlebarStackInput = page.locator('input[name="handlebarStack"]');
+    await expect(handlebarStackInput).toHaveValue("717");
+
+    const handlebarReachInput = page.locator('input[name="handlebarReach"]');
+    await expect(handlebarReachInput).toHaveValue("475");
+
+    // Verify name field defaults to empty (no name in old format)
+    const nameInput = page.locator('input[name="name"]');
+    await expect(nameInput).toHaveValue("");
+  });
+
   test("should load partial URL state with missing fields", async ({
     page,
   }) => {
