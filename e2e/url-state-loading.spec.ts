@@ -188,4 +188,87 @@ test.describe("URL State Loading", () => {
     expect(parsedState.angleHt).toBe(74.5);
     expect(parsedState.name).toBe("Test Config"); // Should preserve name
   });
+
+  test("should load old URL format without name field (backward compatibility)", async ({
+    page,
+  }) => {
+    // Old format: has input/value fields, no name field
+    const oldFormatState = {
+      stemXOrigin: 100,
+      stemYOrigin: 200,
+      spacer: 44,
+      stem: 120,
+      angleHt: 73,
+      angleStem: 23,
+      stack: 601,
+      reach: 396,
+      handlebarStack: 692,
+      handlebarReach: 494,
+      input: "spacer", // old field that should be ignored
+      value: 44, // old field that should be ignored
+    };
+
+    const encodedState = encodeURIComponent(JSON.stringify(oldFormatState));
+    await page.goto(`/?urlstate=${encodedState}`);
+    await page.waitForLoadState("networkidle");
+
+    // Verify slider values loaded correctly
+    const spacerSlider = page.getByRole("slider", { name: "spacer_slider" });
+    await expect(spacerSlider).toHaveValue("44");
+
+    const stemSlider = page.getByRole("slider", {
+      name: "stem_slider",
+      exact: true,
+    });
+    await expect(stemSlider).toHaveValue("120");
+
+    const angleHtSlider = page.getByRole("slider", { name: "angleht_slider" });
+    await expect(angleHtSlider).toHaveValue("73");
+
+    const angleStemSlider = page.getByRole("slider", {
+      name: "anglestem_slider",
+    });
+    await expect(angleStemSlider).toHaveValue("23");
+
+    // Verify name field defaults to empty
+    const nameInput = page.locator('input[name="name"]');
+    await expect(nameInput).toHaveValue("");
+  });
+
+  test("should load partial URL state with missing fields", async ({
+    page,
+  }) => {
+    // Partial state with only some fields - should use defaults for missing ones
+    const partialState = {
+      spacer: 55,
+      stem: 95,
+      name: "Partial",
+    };
+
+    const encodedState = encodeURIComponent(JSON.stringify(partialState));
+    await page.goto(`/?urlstate=${encodedState}`);
+    await page.waitForLoadState("networkidle");
+
+    // Verify provided fields loaded
+    const spacerSlider = page.getByRole("slider", { name: "spacer_slider" });
+    await expect(spacerSlider).toHaveValue("55");
+
+    const stemSlider = page.getByRole("slider", {
+      name: "stem_slider",
+      exact: true,
+    });
+    await expect(stemSlider).toHaveValue("95");
+
+    const nameInput = page.locator('input[name="name"]');
+    await expect(nameInput).toHaveValue("Partial");
+
+    // Verify missing fields use defaults (from INITIAL_FIT_STATE)
+    const angleHtSlider = page.getByRole("slider", { name: "angleht_slider" });
+    await expect(angleHtSlider).toHaveValue("73"); // default
+
+    const angleStemSlider = page.getByRole("slider", {
+      name: "anglestem_slider",
+    });
+    await expect(angleStemSlider).toHaveValue("0"); // default
+  });
 });
