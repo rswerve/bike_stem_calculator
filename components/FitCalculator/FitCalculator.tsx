@@ -95,7 +95,10 @@ const useFitState = () => {
 
     const urlParams = new URLSearchParams(window.location.search);
     const urlstateParam = urlParams.get("urlstate");
-    console.log("[useFitState] URL param:", urlstateParam?.substring(0, 100) + "...");
+    console.log(
+      "[useFitState] URL param:",
+      urlstateParam?.substring(0, 100) + "..."
+    );
 
     if (urlstateParam) {
       const parsed = fitStateParser.parse(urlstateParam);
@@ -136,7 +139,9 @@ const useFitState = () => {
     const hadUrlParam = urlParams.has("urlstate");
 
     if (inUrl === null && hadUrlParam) {
-      console.log("[URL Effect] Skipping - waiting for nuqs to parse URL param");
+      console.log(
+        "[URL Effect] Skipping - waiting for nuqs to parse URL param"
+      );
       return;
     }
 
