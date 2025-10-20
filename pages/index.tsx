@@ -1,15 +1,8 @@
-import { useEffect, useState } from "react";
 import { Link, Typography } from "@mui/material";
 import FitCalculator from "../components/FitCalculator";
 import styles from "../styles/Home.module.css";
 
 const Home = () => {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
   return (
     <>
       <Typography variant="h4" color="blue" mt={1} ml={1}>
@@ -34,20 +27,18 @@ const Home = () => {
             To save your work, simply bookmark the page.
           </Typography>
         </div>
-        {isMounted ? <FitCalculator /> : null}
+        <FitCalculator />
       </div>
-      {isMounted ? (
-        <footer className={styles.footer}>
-          <Typography variant="body2" mt={5} mb={1} ml={1}>
-            For suggestions or bug reports, please send an email to
-            rswerve@gmail.com or{" "}
-            <Link href="https://github.com/rswerve/bike_stem_calculator/issues">
-              open an issue
-            </Link>{" "}
-            on Github.
-          </Typography>
-        </footer>
-      ) : null}
+      <footer className={styles.footer}>
+        <Typography variant="body2" mt={5} mb={1} ml={1}>
+          For suggestions or bug reports, please send an email to
+          rswerve@gmail.com or{" "}
+          <Link href="https://github.com/rswerve/bike_stem_calculator/issues">
+            open an issue
+          </Link>{" "}
+          on Github.
+        </Typography>
+      </footer>
     </>
   );
 };
