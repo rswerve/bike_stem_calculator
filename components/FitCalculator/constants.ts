@@ -8,7 +8,7 @@ export const INITIAL_FIT_STATE: FitState = {
   spacer: 40,
   stem: 100,
   angleHt: 73,
-  angleStem: 0,
+  angleStem: -6,
   stack: "",
   reach: "",
   handlebarStack: "",

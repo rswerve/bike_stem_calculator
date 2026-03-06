@@ -43,7 +43,8 @@ const spacerTooltip: TooltipContent = (
 
 const stemAngleTooltip: TooltipContent = (
   <Typography variant="body1">
-    Measured from the horizontal, not relative to the headtube angle
+    Measured relative to the headtube angle, as marketed by stem manufacturers
+    (e.g. -6&deg; or -17&deg;)
   </Typography>
 );
 
@@ -105,7 +106,7 @@ const useFitState = () => {
     return INITIAL_FIT_STATE;
   };
 
-  const initialData = getInitialState();
+  const initialData = inUrl ?? getInitialState();
   const [state, dispatch] = useReducer(reducer, initialData);
   const debouncedState = useDebounce(state, 250);
   const [inputError, setInputError] = useState<string | null>(null);

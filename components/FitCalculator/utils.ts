@@ -6,7 +6,9 @@ export const getRadians = (angleDegrees: number): number => {
 
 export const calculateGeometry = (state: FitState) => {
   const flippedHeadtubeAngle = 90 + (90 - state.angleHt);
-  const stemAngle = 180 - state.angleStem;
+  // Convert stem angle from relative-to-headtube to absolute (from horizontal)
+  const absoluteStemAngle = (90 - state.angleHt) + state.angleStem;
+  const stemAngle = 180 - absoluteStemAngle;
 
   const topOfHTX =
     state.stemXOrigin +
@@ -20,8 +22,8 @@ export const calculateGeometry = (state: FitState) => {
 
   const spacerRise = state.spacer * Math.sin(getRadians(state.angleHt));
   const spacerRun = state.spacer * Math.sin(getRadians(90 - state.angleHt));
-  const stemRise = state.stem * Math.sin(getRadians(state.angleStem));
-  const stemRun = state.stem * Math.sin(getRadians(90 - state.angleStem));
+  const stemRise = state.stem * Math.sin(getRadians(absoluteStemAngle));
+  const stemRun = state.stem * Math.sin(getRadians(90 - absoluteStemAngle));
 
   const totalRise = spacerRise + stemRise;
   const totalRun = stemRun - spacerRun;
