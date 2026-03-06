@@ -368,6 +368,6 @@ test.describe("URL State Loading", () => {
     const angleStemSlider = page.getByRole("slider", {
       name: "anglestem_slider",
     });
-    await expect(angleStemSlider).toHaveValue("0"); // default
+    await expect(angleStemSlider).toHaveValue("-6"); // default
   });
 });

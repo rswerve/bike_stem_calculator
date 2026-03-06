@@ -44,7 +44,7 @@ const parsedStateFixture: FitState = {
   spacer: 62,
   stem: 120,
   angleHt: 73,
-  angleStem: 0,
+  angleStem: -6,
   stack: "",
   reach: "",
   handlebarStack: "",
@@ -97,7 +97,7 @@ it("hydrates state from url query on initial render", () => {
   expect(angleHtSlider.valueAsNumber).toBe(73);
 
   const angleStemSlider = getSlider("anglestem_slider");
-  expect(angleStemSlider.valueAsNumber).toBe(0);
+  expect(angleStemSlider.valueAsNumber).toBe(-6);
 
   // Verify the mock was called with the right key
   expect(mockUseQueryState).toHaveBeenCalledWith("urlstate", expect.anything());

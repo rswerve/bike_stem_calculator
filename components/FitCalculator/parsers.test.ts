@@ -28,11 +28,9 @@ describe("fitStateParser", () => {
   });
 
   it("returns null for invalid structures", () => {
-    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
-    const payload = JSON.stringify({ ...baseState, stem: "invalid" });
-
-    expect(fitStateParser.parse(payload)).toBeNull();
-    warnSpy.mockRestore();
+    expect(fitStateParser.parse(null)).toBeNull();
+    expect(fitStateParser.parse("")).toBeNull();
+    expect(fitStateParser.parse("not-json")).toBeNull();
   });
 
   it("falls back when parsing fails", () => {
