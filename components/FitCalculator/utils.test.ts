@@ -7,6 +7,7 @@ import {
   calculateReachDiff,
   calculateStackDiff,
   formatAxisDifference,
+  getAxisDifferenceDisplay,
   formatDiffMessage,
   getInstalledStemAngle,
   getComparisonDrawOrder,
@@ -198,6 +199,17 @@ describe("fit target", () => {
 });
 
 describe("difference labels", () => {
+  it("separates the emphasized value from its directional detail", () => {
+    expect(getAxisDifferenceDisplay(-2.4, "low", "high")).toEqual({
+      value: "2",
+      detail: "mm low",
+    });
+    expect(getAxisDifferenceDisplay(0.49, "short", "long")).toEqual({
+      value: "Exact",
+      detail: "",
+    });
+  });
+
   it("labels rounded zero as exact", () => {
     expect(formatAxisDifference(0.49, "low", "high")).toBe("Exact");
     expect(formatAxisDifference(-0.49, "short", "long")).toBe("Exact");

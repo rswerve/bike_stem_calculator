@@ -130,17 +130,33 @@ export const getTargetOffset = (state: FitState) => {
   };
 };
 
-export const formatAxisDifference = (
+export const getAxisDifferenceDisplay = (
   difference: number,
   negativeLabel: string,
   positiveLabel: string
 ) => {
   const rounded = Math.round(difference);
   if (rounded === 0) {
-    return "Exact";
+    return { value: "Exact", detail: "" };
   }
 
-  return `${Math.abs(rounded)} mm ${rounded < 0 ? negativeLabel : positiveLabel}`;
+  return {
+    value: String(Math.abs(rounded)),
+    detail: `mm ${rounded < 0 ? negativeLabel : positiveLabel}`,
+  };
+};
+
+export const formatAxisDifference = (
+  difference: number,
+  negativeLabel: string,
+  positiveLabel: string
+) => {
+  const { value, detail } = getAxisDifferenceDisplay(
+    difference,
+    negativeLabel,
+    positiveLabel
+  );
+  return detail ? `${value} ${detail}` : value;
 };
 
 export const getTargetProximity = (difference: number): TargetProximity => {

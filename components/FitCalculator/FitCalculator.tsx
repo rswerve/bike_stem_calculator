@@ -30,6 +30,7 @@ import type {
 import {
   calculateGeometry,
   formatAxisDifference,
+  getAxisDifferenceDisplay,
   getTargetOffset,
   getTargetProximity,
 } from "./utils";
@@ -429,6 +430,16 @@ const FitCalculator = () => {
   const targetReachDifference = target
     ? geometry.totalRun - target.run
     : 0;
+  const targetHeightDisplay = getAxisDifferenceDisplay(
+    targetHeightDifference,
+    "low",
+    "high"
+  );
+  const targetReachDisplay = getAxisDifferenceDisplay(
+    targetReachDifference,
+    "short",
+    "long"
+  );
 
   useEffect(() => {
     if (target && !restorableSetup) {
@@ -683,7 +694,7 @@ const FitCalculator = () => {
             ) : (
               <button
                 type="button"
-                className={styles.secondaryButton}
+                className={`${styles.secondaryButton} ${styles.compareButton}`}
                 onClick={() => updateField("reference", currentSetup(state))}
               >
                 Pin this setup and compare a new one
@@ -691,7 +702,27 @@ const FitCalculator = () => {
             )}
           </div>
 
-          <div className={styles.bigResults} aria-live="polite">
+          <p
+            className={styles.visuallyHidden}
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            Cockpit position: height {signedMillimetres(resultRise)} mm; reach{" "}
+            {signedMillimetres(resultRun)} mm.
+            {target
+              ? ` Compared with target: height ${formatAxisDifference(
+                  targetHeightDifference,
+                  "low",
+                  "high"
+                )}; reach ${formatAxisDifference(
+                  targetReachDifference,
+                  "short",
+                  "long"
+                )}.`
+              : ""}
+          </p>
+
+          <div className={styles.bigResults}>
             <div>
               <strong>{signedMillimetres(resultRise)}</strong>
               <span>mm height</span>
@@ -715,31 +746,45 @@ const FitCalculator = () => {
 
           {target ? (
             <div className={styles.targetStatus}>
-              <span>Compared with target</span>
-              <strong
-                className={targetProximityClass(targetHeightDifference)}
-                data-axis="height"
-                data-proximity={getTargetProximity(targetHeightDifference)}
-              >
-                Height:{" "}
-                {formatAxisDifference(
-                  targetHeightDifference,
-                  "low",
-                  "high"
-                )}
-              </strong>
-              <strong
-                className={targetProximityClass(targetReachDifference)}
-                data-axis="reach"
-                data-proximity={getTargetProximity(targetReachDifference)}
-              >
-                Reach:{" "}
-                {formatAxisDifference(
-                  targetReachDifference,
-                  "short",
-                  "long"
-                )}
-              </strong>
+              <span className={styles.targetHeading}>Compared with target</span>
+              <div className={styles.targetResults}>
+                <div
+                  className={`${styles.targetMetric} ${targetProximityClass(targetHeightDifference)}`}
+                  role="group"
+                  data-axis="height"
+                  data-proximity={getTargetProximity(targetHeightDifference)}
+                  aria-label={`Height: ${formatAxisDifference(
+                    targetHeightDifference,
+                    "low",
+                    "high"
+                  )}`}
+                >
+                  <div aria-hidden="true">
+                    <strong>{targetHeightDisplay.value}</strong>
+                    {targetHeightDisplay.detail ? (
+                      <span>{targetHeightDisplay.detail}</span>
+                    ) : null}
+                  </div>
+                </div>
+                <div
+                  className={`${styles.targetMetric} ${targetProximityClass(targetReachDifference)}`}
+                  role="group"
+                  data-axis="reach"
+                  data-proximity={getTargetProximity(targetReachDifference)}
+                  aria-label={`Reach: ${formatAxisDifference(
+                    targetReachDifference,
+                    "short",
+                    "long"
+                  )}`}
+                >
+                  <div aria-hidden="true">
+                    <strong>{targetReachDisplay.value}</strong>
+                    {targetReachDisplay.detail ? (
+                      <span>{targetReachDisplay.detail}</span>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
             </div>
           ) : null}
 

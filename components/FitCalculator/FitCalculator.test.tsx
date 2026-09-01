@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { INITIAL_FIT_STATE } from "./constants";
@@ -465,11 +471,16 @@ describe("matching setups", () => {
   it("shows the current setup above five well-labelled fixed matches", () => {
     seedState(completeState);
     const { container } = render(<FitCalculator />);
+    const matches = container.querySelector<HTMLElement>(
+      'section[aria-labelledby="matches-title"]'
+    );
+
+    expect(matches).not.toBeNull();
 
     expect(screen.getAllByText("Stem length")).toHaveLength(2);
-    expect(screen.getByText("Stem angle")).toBeDefined();
-    expect(screen.getByText("Height vs target")).toBeDefined();
-    expect(screen.getByText("Reach vs target")).toBeDefined();
+    expect(within(matches!).getByText("Stem angle")).toBeDefined();
+    expect(within(matches!).getByText("Height vs target")).toBeDefined();
+    expect(within(matches!).getByText("Reach vs target")).toBeDefined();
     expect(matchRows(container)).toHaveLength(6);
     expect(matchRows(container)[0]).toHaveAccessibleName(/Original setup/);
     expect(matchRows(container)[0].getAttribute("aria-label")).toMatch(

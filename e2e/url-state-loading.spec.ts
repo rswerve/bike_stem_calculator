@@ -466,7 +466,7 @@ test.describe("bike stem calculator", () => {
       );
     });
 
-    for (const foreground of ["ink", "muted", "control"]) {
+    for (const foreground of ["ink", "muted", "control", "blue"]) {
       for (const background of ["page", "card", "wash"]) {
         expect(
           contrastRatio(palette[foreground], palette[background]),
@@ -503,6 +503,35 @@ test.describe("bike stem calculator", () => {
     const drawing = page.getByRole("img", { name: /stem and spacer geometry/i });
     const height = page.locator('[data-axis="height"]');
     const reach = page.locator('[data-axis="reach"]');
+    const rawHeight = page.getByText("+38", { exact: true });
+    const liveResult = page.locator(
+      '[aria-live="polite"][aria-atomic="true"]'
+    );
+
+    await expect(liveResult).toContainText("Compared with target: height");
+    await expect(height).toHaveAccessibleName(
+      /Height: \d+ mm (low|high)|Height: Exact/
+    );
+    await expect(reach).toHaveAccessibleName(
+      /Reach: \d+ mm (short|long)|Reach: Exact/
+    );
+    const [targetFontSize, rawFontSize] = await Promise.all([
+      height
+        .locator("strong")
+        .evaluate((element) => getComputedStyle(element).fontSize),
+      rawHeight.evaluate((element) => getComputedStyle(element).fontSize),
+    ]);
+    expect(targetFontSize).toBe(rawFontSize);
+    expect(Number.parseFloat(rawFontSize)).toBeLessThanOrEqual(27);
+    await expect(height).not.toContainText("Height vs target");
+    await expect(reach).not.toContainText("Reach vs target");
+    const [targetBox, rawBox] = await Promise.all([
+      height.boundingBox(),
+      rawHeight.locator("..").boundingBox(),
+    ]);
+    expect(
+      Math.abs((targetBox?.height ?? 0) - (rawBox?.height ?? 0))
+    ).toBeLessThanOrEqual(1);
 
     await expect(drawing.locator('[aria-label="Fit target"] circle').first()).toHaveAttribute(
       "r",
@@ -532,6 +561,23 @@ test.describe("bike stem calculator", () => {
     await expect(trigger).toHaveCSS("border-color", "rgb(154, 79, 0)");
     await trigger.hover();
     await expect(trigger).toHaveCSS("color", "rgb(116, 59, 0)");
+  });
+
+  test("makes the comparison action visually distinct from its undo", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const compare = page.getByRole("button", {
+      name: "Pin this setup and compare a new one",
+    });
+
+    await expect(compare).toHaveCSS("color", "rgb(36, 95, 204)");
+    await expect(compare).toHaveCSS("border-color", "rgb(36, 95, 204)");
+    await compare.click();
+
+    const stop = page.getByRole("button", { name: "Stop comparing" });
+    await expect(stop).toHaveCSS("color", "rgb(52, 56, 61)");
+    await expect(stop).toHaveCSS("border-color", "rgb(133, 141, 148)");
   });
 
   test("keeps inputs, drawing, and labeled matches side by side on desktop", async ({
@@ -574,6 +620,11 @@ test.describe("bike stem calculator", () => {
     expect(resultBox?.x ?? 0).toBeGreaterThan(setupBox?.x ?? 0);
     expect(matchesBox?.x ?? 0).toBeGreaterThan(resultBox?.x ?? 0);
     expect(resultBox?.width ?? 0).toBeLessThan(matchesBox?.width ?? 0);
+    expect(
+      (await result
+        .getByRole("img", { name: /stem and spacer geometry/i })
+        .boundingBox())?.height ?? 0
+    ).toBeGreaterThanOrEqual(450);
     expect((await setupName.boundingBox())?.y ?? 999).toBeLessThan(
       (await setupHeading.boundingBox())?.y ?? 0
     );
@@ -830,8 +881,8 @@ test.describe("bike stem calculator", () => {
   test("keeps the compact result and drawing visible while mobile sliders move", async ({
     page,
   }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/");
+    await page.setViewportSize({ width: 320, height: 844 });
+    await page.goto(withState(completeState));
     const result = page.locator('section[aria-labelledby="result-title"]');
     const spacer = slider(page, "Spacer stack");
 
@@ -842,6 +893,19 @@ test.describe("bike stem calculator", () => {
       .getByRole("img", { name: /stem and spacer geometry/i })
       .boundingBox();
 
+    await expect(page.locator('[data-axis="height"]')).toBeVisible();
+    await expect(page.locator('[data-axis="reach"]')).toBeVisible();
+    const targetTileWidths = await page
+      .locator("[data-axis]")
+      .evaluateAll((elements) =>
+        elements.map((element) => ({
+          clientWidth: element.clientWidth,
+          scrollWidth: element.scrollWidth,
+        }))
+      );
+    expect(targetTileWidths.every(({ clientWidth, scrollWidth }) => scrollWidth <= clientWidth)).toBe(
+      true
+    );
     expect(resultBox?.y).toBeGreaterThanOrEqual(0);
     expect(drawingBox?.y).toBeGreaterThanOrEqual(0);
     expect(drawingBox && drawingBox.y + drawingBox.height).toBeLessThanOrEqual(
@@ -850,5 +914,35 @@ test.describe("bike stem calculator", () => {
 
     await spacer.fill("60");
     await expect(page.getByText("+57", { exact: true })).toBeVisible();
+  });
+
+  test("keeps the target drawing reachable on a short phone", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 667 });
+    await page.goto(withState(completeState));
+    const result = page.locator('section[aria-labelledby="result-title"]');
+    const drawing = page.getByRole("img", {
+      name: /stem and spacer geometry/i,
+    });
+
+    await expect(page.locator('[data-axis="height"]')).toBeVisible();
+    await expect(drawing).toBeVisible();
+    const [resultBox, drawingBox, dimensions] = await Promise.all([
+      result.boundingBox(),
+      drawing.boundingBox(),
+      result.evaluate((element) => ({
+        clientHeight: element.clientHeight,
+        scrollHeight: element.scrollHeight,
+      })),
+    ]);
+
+    expect(dimensions.scrollHeight).toBeLessThanOrEqual(
+      dimensions.clientHeight + 1
+    );
+    expect((drawingBox?.y ?? 0) + (drawingBox?.height ?? 0)).toBeLessThanOrEqual(
+      (resultBox?.y ?? 0) + (resultBox?.height ?? 0)
+    );
+    expect(drawingBox?.height ?? 0).toBeGreaterThanOrEqual(220);
   });
 });
