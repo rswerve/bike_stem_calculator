@@ -1,17 +1,22 @@
 export type NumericInput = number | "";
 
-export interface FitState {
-  stemXOrigin: number;
-  stemYOrigin: number;
+export type StemOrientation = "up" | "flipped";
+
+export interface StemSetup {
   spacer: number;
   stem: number;
+  stemAngle: number;
+  orientation: StemOrientation;
+}
+
+export interface FitState extends StemSetup {
   angleHt: number;
-  angleStem: number;
   stack: NumericInput;
   reach: NumericInput;
   handlebarStack: NumericInput;
   handlebarReach: NumericInput;
   name: string;
+  reference: StemSetup | null;
 }
 
 export type FitReducerAction =
@@ -23,4 +28,8 @@ export type FitReducerAction =
   | {
       type: "replace";
       payload: FitState;
+    }
+  | {
+      type: "loadSetup";
+      payload: StemSetup;
     };

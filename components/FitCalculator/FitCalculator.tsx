@@ -1,79 +1,110 @@
-import { useEffect, useLayoutEffect, useReducer, useState } from "react";
-import { Slider, TextField, Tooltip, Typography } from "@mui/material";
-import InfoIcon from "@mui/icons-material/Info";
+import Head from "next/head";
+import {
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useQueryState } from "nuqs";
 
 import useDebounce from "../../hooks/useDebounce";
 import styles from "../../styles/Home.module.css";
 
-import { INITIAL_FIT_STATE, SHRINK_FACTOR } from "./constants";
+import CockpitDrawing from "./CockpitDrawing";
+import { INITIAL_FIT_STATE } from "./constants";
+import {
+  createSetupMatch,
+  findAdjustableFallback,
+  findFixedMatches,
+} from "./matching";
+import MatchingSetups from "./MatchingSetups";
 import { fitStateParser } from "./parsers";
-import { FitReducerAction, FitState } from "./types";
+import type {
+  FitReducerAction,
+  FitState,
+  NumericInput,
+  StemSetup,
+} from "./types";
 import {
   calculateGeometry,
-  calculateReachDiff,
-  calculateStackDiff,
-  formatDiffMessage,
+  formatAxisDifference,
+  getTargetOffset,
+  getTargetProximity,
 } from "./utils";
 
-type TooltipContent = JSX.Element | string;
+type MeasurementField =
+  | "stack"
+  | "reach"
+  | "handlebarStack"
+  | "handlebarReach";
 
-const fitTooltip: TooltipContent = (
-  <Typography variant="body1">
-    HY and HX are measured from the bottom bracket to the center of the
-    handlebars.{" "}
-    <a
-      href="https://web.archive.org/web/20200809061637/https://www.slowtwitch.com/Bike_Fit/The_Secret_Weapon_of_Superstar_Fitters_HX_6335.html"
-      target="_blank"
-      rel="noreferrer"
-    >
-      <u>This article</u>
-    </a>{" "}
-    is a good explanation of the importance of these measurements.
-  </Typography>
-);
+type ControlField = "spacer" | "stem" | "stemAngle" | "angleHt";
 
-const spacerTooltip: TooltipContent = (
-  <Typography variant="body1">
-    Include everything between the headset and the handlebar clamp--like the
-    headset top cap--in addition to the spacers. Note that bikes with carbon
-    steerers are recommended not to exceed about 40mm in spacers.
-  </Typography>
-);
+type ControlBounds = {
+  spacerMin: number;
+  spacerMax: number;
+  stemMin: number;
+  stemMax: number;
+  stemAngleMin: number;
+  stemAngleMax: number;
+  headTubeAngleMin: number;
+  headTubeAngleMax: number;
+};
 
-const stemAngleTooltip: TooltipContent = (
-  <Typography variant="body1">
-    Measured from the horizontal, not relative to the headtube angle
-  </Typography>
-);
+const DEFAULT_CONTROL_BOUNDS: ControlBounds = {
+  spacerMin: 0,
+  spacerMax: 80,
+  stemMin: 50,
+  stemMax: 150,
+  stemAngleMin: 0,
+  stemAngleMax: 40,
+  headTubeAngleMin: 65,
+  headTubeAngleMax: 85,
+};
 
-const reducer = (state: FitState, action: FitReducerAction): FitState => {
-  switch (action.type) {
-    case "update": {
-      return {
-        ...state,
-        [action.field]: action.value,
-      };
-    }
-    case "replace":
-      return { ...action.payload };
-    default:
-      return state;
+const targetProximityClass = (difference: number) => {
+  switch (getTargetProximity(difference)) {
+    case "on-target":
+      return styles.targetOn;
+    case "close":
+      return styles.targetClose;
+    case "far":
+      return styles.targetFar;
   }
 };
 
-const useScrollRestoration = () => {
-  useLayoutEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
+const expandControlBounds = (
+  bounds: ControlBounds,
+  state: FitState
+): ControlBounds => ({
+  spacerMin: Math.min(bounds.spacerMin, state.spacer),
+  spacerMax: Math.max(bounds.spacerMax, state.spacer),
+  stemMin: Math.min(bounds.stemMin, state.stem),
+  stemMax: Math.max(bounds.stemMax, state.stem),
+  stemAngleMin: Math.min(bounds.stemAngleMin, state.stemAngle),
+  stemAngleMax: Math.max(bounds.stemAngleMax, state.stemAngle),
+  headTubeAngleMin: Math.min(bounds.headTubeAngleMin, state.angleHt),
+  headTubeAngleMax: Math.max(bounds.headTubeAngleMax, state.angleHt),
+});
 
-    const scrollPosition = window.sessionStorage.getItem("scrollPosition");
-    if (scrollPosition) {
-      window.scrollTo(0, parseInt(scrollPosition, 10));
-      window.sessionStorage.removeItem("scrollPosition");
-    }
-  }, []);
+const rememberFirstSetup = (
+  current: StemSetup | null,
+  setup: StemSetup
+): StemSetup => current ?? setup;
+
+const reducer = (state: FitState, action: FitReducerAction): FitState => {
+  switch (action.type) {
+    case "update":
+      return { ...state, [action.field]: action.value };
+    case "replace":
+      return { ...action.payload };
+    case "loadSetup":
+      return { ...state, ...action.payload };
+    default:
+      return state;
+  }
 };
 
 const useUrlState = () =>
@@ -83,447 +114,737 @@ const useUrlState = () =>
   });
 
 const useFitState = () => {
-  const [inUrl, setInUrl] = useUrlState();
-  const [hasMounted, setHasMounted] = useState(false);
-
-  // CRITICAL FIX: Manually parse URL on first render to bypass nuqs timing issues
-  const getInitialState = (): FitState => {
-    if (typeof window === "undefined") {
-      return INITIAL_FIT_STATE;
-    }
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlstateParam = urlParams.get("urlstate");
-
-    if (urlstateParam) {
-      const parsed = fitStateParser.parse(urlstateParam);
-      if (parsed) {
-        return parsed;
-      }
-    }
-
-    return INITIAL_FIT_STATE;
-  };
-
-  const initialData = getInitialState();
-  const [state, dispatch] = useReducer(reducer, initialData);
+  const [, setInUrl] = useUrlState();
+  const [state, dispatch] = useReducer(reducer, INITIAL_FIT_STATE);
+  const [controlBounds, expandBounds] = useReducer(
+    expandControlBounds,
+    DEFAULT_CONTROL_BOUNDS
+  );
   const debouncedState = useDebounce(state, 250);
-  const [inputError, setInputError] = useState<string | null>(null);
+  const initialUrlState = useRef<FitState | null | undefined>(undefined);
+  const urlIsReadyForWrites = useRef(false);
+  const lastUrlWrite = useRef<string | null>(null);
 
-  // Mark as mounted after first render
   useEffect(() => {
-    setHasMounted(true);
+    if (
+      typeof window === "undefined" ||
+      initialUrlState.current !== undefined
+    ) {
+      return;
+    }
+
+    const rawState = new URLSearchParams(window.location.search).get(
+      "urlstate"
+    );
+    const parsedState = rawState ? fitStateParser.parse(rawState) : null;
+
+    initialUrlState.current = parsedState;
+    if (parsedState) {
+      expandBounds(parsedState);
+      dispatch({ type: "replace", payload: parsedState });
+    } else {
+      urlIsReadyForWrites.current = true;
+    }
   }, []);
 
   useEffect(() => {
+    if (
+      !urlIsReadyForWrites.current &&
+      initialUrlState.current &&
+      JSON.stringify(state) === JSON.stringify(initialUrlState.current)
+    ) {
+      urlIsReadyForWrites.current = true;
+    }
+  }, [state]);
+
+  useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
 
-    // Skip write-back until after mount
-    if (!hasMounted) {
+    const serializedState = JSON.stringify(debouncedState);
+    if (
+      !urlIsReadyForWrites.current ||
+      serializedState !== JSON.stringify(state)
+    ) {
       return;
     }
 
-    // If there was a URL param initially, wait for nuqs to parse it first
-    const urlParams = new URLSearchParams(window.location.search);
-    const hadUrlParam = urlParams.has("urlstate");
-
-    if (inUrl === null && hadUrlParam) {
+    if (serializedState === lastUrlWrite.current) {
       return;
     }
 
-    window.sessionStorage.setItem("scrollPosition", window.scrollY.toString());
+    lastUrlWrite.current = serializedState;
     void setInUrl(debouncedState);
-  }, [debouncedState, setInUrl, hasMounted, inUrl]);
+  }, [debouncedState, setInUrl, state]);
 
-  return {
-    state,
-    dispatch,
-    inputError,
-    setInputError,
-  } as const;
+  return { state, dispatch, controlBounds, expandBounds } as const;
 };
 
-const useGeometry = (state: FitState) => {
-  return calculateGeometry(state);
-};
-
-const isNumberMismatch = (value: string) =>
-  value.length > 0 && !/^[0-9]*$/.test(value);
-
-const validateNumericField = (
-  field: keyof FitState,
-  value: string,
-  setInputError: (field: string | null) => void,
-  dispatch: (action: FitReducerAction) => void
-) => {
-  if (isNumberMismatch(value)) {
-    setInputError(field);
-    return;
-  }
-
-  setInputError(null);
-  dispatch({
-    type: "update",
-    field,
-    value: value === "" ? "" : Number(value),
-  });
-};
-
-const validateTextField = (
-  field: keyof FitState,
-  value: string,
-  setInputError: (field: string | null) => void,
-  dispatch: (action: FitReducerAction) => void
-) => {
-  if (value.length > 100) {
-    setInputError(field);
-    return;
-  }
-
-  setInputError(null);
-  dispatch({
-    type: "update",
-    field,
-    value,
-  });
-};
-
-const SpacerLabel = ({ tooltip }: { tooltip: TooltipContent }) => (
-  <Tooltip title={tooltip} leaveTouchDelay={10000} enterTouchDelay={5}>
-    <Typography sx={{ fontSize: "0.875rem", fontWeight: "regular" }}>
-      Spacer height <InfoIcon fontSize="small" sx={{ color: "orange" }} />
-    </Typography>
-  </Tooltip>
-);
-
-const StemAngleLabel = ({ tooltip }: { tooltip: TooltipContent }) => (
-  <Tooltip title={tooltip} leaveTouchDelay={10000}>
-    <Typography sx={{ fontSize: "0.875rem" }}>
-      Stem angle <InfoIcon fontSize="small" sx={{ color: "orange" }} />
-    </Typography>
-  </Tooltip>
-);
-
-const NameField = ({
-  value,
-  onChange,
-  hasError,
-  isDisabled,
-}: {
-  value: string;
-  onChange: (nextValue: string) => void;
-  hasError: boolean;
-  isDisabled: boolean;
-}) => (
-  <TextField
-    disabled={isDisabled}
-    error={hasError}
-    name="name"
-    value={value}
-    onChange={(event) => onChange(event.target.value)}
-    id="name"
-    style={{ width: 421 }}
-    helperText={hasError ? "That's too long" : ""}
-  />
-);
-
-const NumericField = ({
-  field,
-  value,
+const InfoTip = ({
+  id,
   label,
-  onChange,
-  hasError,
-  isDisabled,
+  children,
 }: {
-  field: keyof FitState;
-  value: number | "";
+  id: string;
   label: string;
-  onChange: (nextValue: string) => void;
-  hasError: boolean;
-  isDisabled: boolean;
+  children: ReactNode;
 }) => (
-  <TextField
-    id={field}
-    name={field}
-    style={{ width: 100 }}
-    inputProps={{
-      type: "text",
-      inputMode: "numeric",
-      pattern: "[0-9]*",
-      "aria-label": field,
-    }}
-    value={value}
-    disabled={isDisabled}
-    error={hasError}
-    helperText={hasError ? "Numbers only" : label}
-    onChange={(event) => onChange(event.target.value)}
-  />
+  <span className={styles.infoTip}>
+    <button type="button" aria-label={label} aria-describedby={id}>
+      i
+    </button>
+    <span id={id} role="tooltip">
+      {children}
+    </span>
+  </span>
 );
 
-const FitCalculator = () => {
-  useScrollRestoration();
-  const { state, dispatch, inputError, setInputError } = useFitState();
+const formatControlValue = (value: number) => String(value);
 
-  const {
-    topOfHTX,
-    topOfHTY,
-    stemEndX,
-    stemEndY,
-    spacerRise,
-    spacerRun,
-    stemRise,
-    stemRun,
-    totalRise,
-    totalRun,
-  } = useGeometry(state);
+const parseControlValue = (
+  draft: string,
+  hardMin: number,
+  hardMax?: number
+) => {
+  if (!/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(draft.trim())) return undefined;
+  const value = Number(draft);
+  return Number.isFinite(value) &&
+    value >= hardMin &&
+    (hardMax === undefined || value <= hardMax)
+    ? value
+    : undefined;
+};
 
-  const stackDiff = calculateStackDiff(state, spacerRise, stemRise);
-  const reachDiff = calculateReachDiff(state, stemRun, spacerRun);
-  const stackMessage = formatDiffMessage(
-    stackDiff,
-    "TOO TALL",
-    "TOO SHORT",
-    "Stack"
-  );
-  const reachMessage = formatDiffMessage(
-    reachDiff,
-    "TOO LONG",
-    "TOO SHORT",
-    "Reach"
-  );
+const isOnControlStep = (value: number, min: number, step: number) => {
+  const stepsFromMinimum = (value - min) / step;
+  return Math.abs(stepsFromMinimum - Math.round(stepsFromMinimum)) < 1e-8;
+};
 
-  const handleSliderChange = (field: keyof FitState, value: number) => {
-    dispatch({
-      type: "update",
-      field,
-      value,
-    });
+const RangeControl = ({
+  label,
+  value,
+  min,
+  max,
+  step,
+  hardMin,
+  hardMax,
+  unit,
+  ariaLabel,
+  onChange,
+  onCommit,
+  detail,
+  tooltip,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  hardMin: number;
+  hardMax?: number;
+  unit: string;
+  ariaLabel: string;
+  onChange: (value: number) => void;
+  onCommit: (value: number) => void;
+  detail?: string;
+  tooltip?: ReactNode;
+}) => {
+  const [draft, setDraft] = useState<string | null>(null);
+  const displayedValue = draft ?? formatControlValue(value);
+  const parsedDraft = parseControlValue(displayedValue, hardMin, hardMax);
+  const rangeStep = isOnControlStep(value, min, step) ? step : "any";
+
+  const commitDraft = () => {
+    if (parsedDraft !== undefined) {
+      onChange(parsedDraft);
+      onCommit(parsedDraft);
+    }
+    setDraft(null);
   };
 
-  const hasError = (field: keyof FitState) => inputError === field;
-  const isDisabled = (field: keyof FitState) =>
-    Boolean(inputError && !hasError(field));
+  return (
+    <div className={styles.rangeControl}>
+      <div className={styles.controlLabel}>
+        <span className={styles.controlName}>
+          {label}
+          {tooltip ? (
+            <InfoTip id={`${ariaLabel}-tip`} label={`About ${label}`}>
+              {tooltip}
+            </InfoTip>
+          ) : null}
+        </span>
+        <span className={styles.controlValue}>
+          <input
+            type="text"
+            inputMode="decimal"
+            value={displayedValue}
+            aria-label={`${ariaLabel} value`}
+            onFocus={(event) => {
+              setDraft(formatControlValue(value));
+              event.currentTarget.select();
+            }}
+            onChange={(event) => {
+              const nextDraft = event.target.value;
+              setDraft(nextDraft);
+              const nextValue = parseControlValue(
+                nextDraft,
+                hardMin,
+                hardMax
+              );
+              if (nextValue !== undefined) {
+                onChange(nextValue);
+              }
+            }}
+            onBlur={commitDraft}
+            onKeyDown={(event) => {
+              if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+                event.preventDefault();
+                const nextValue =
+                  (parsedDraft ?? value) +
+                  (event.key === "ArrowUp" ? step : -step);
+                const validValue = parseControlValue(
+                  formatControlValue(nextValue),
+                  hardMin,
+                  hardMax
+                );
+                if (validValue !== undefined) {
+                  setDraft(formatControlValue(validValue));
+                  onChange(validValue);
+                }
+              } else if (event.key === "Enter") {
+                event.currentTarget.blur();
+              }
+              if (event.key === "Escape") {
+                setDraft(null);
+                event.currentTarget.blur();
+              }
+            }}
+          />
+          <span aria-hidden="true">{unit.trim()}</span>
+        </span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={rangeStep}
+        value={value}
+        aria-label={ariaLabel}
+        onChange={(event) => onChange(Number(event.target.value))}
+      />
+      <div className={styles.rangeEnds} aria-hidden="true">
+        <span>
+          {min}
+          {unit}
+        </span>
+        {detail ? <span>{detail}</span> : <span />}
+        <span>
+          {max}
+          {unit}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+const MeasurementInput = ({
+  field,
+  label,
+  hint,
+  value,
+  error,
+  onChange,
+}: {
+  field: MeasurementField;
+  label: string;
+  hint: string;
+  value: NumericInput | string;
+  error?: string;
+  onChange: (value: string) => void;
+}) => (
+  <label className={styles.measurementField}>
+    <span>{label}</span>
+    <div>
+      <input
+        id={field}
+        name={field}
+        value={value}
+        inputMode="decimal"
+        aria-label={field}
+        aria-invalid={Boolean(error)}
+        onChange={(event) => onChange(event.target.value)}
+      />
+      <span>mm</span>
+    </div>
+    <small className={error ? styles.fieldError : undefined}>
+      {error ?? hint}
+    </small>
+  </label>
+);
+
+const currentSetup = (state: FitState): StemSetup => ({
+  spacer: state.spacer,
+  stem: state.stem,
+  stemAngle: state.stemAngle,
+  orientation: state.orientation,
+});
+
+const setupDescription = (setup: StemSetup) =>
+  `${setup.stem} mm · ${setup.stemAngle}° ${setup.orientation} · ${setup.spacer} mm spacers`;
+
+const signedMillimetres = (value: number) => {
+  const rounded = Math.round(value);
+  if (rounded === 0) return "0";
+  return `${rounded > 0 ? "+" : "−"}${Math.abs(rounded)}`;
+};
+
+const installedAngleDescription = (angle: number) => {
+  const rounded = Number(Math.abs(angle).toFixed(1));
+  if (rounded === 0) return "Level with the ground";
+  return `${rounded}° ${angle > 0 ? "above" : "below"} horizontal`;
+};
+
+const FitCalculator = () => {
+  const { state, dispatch, controlBounds, expandBounds } = useFitState();
+  const [drafts, setDrafts] = useState<
+    Partial<Record<MeasurementField, string>>
+  >({});
+  const [errors, setErrors] = useState<
+    Partial<Record<MeasurementField, string>>
+  >({});
+  const [restorableSetup, rememberRestorableSetup] = useReducer(
+    rememberFirstSetup,
+    null
+  );
+
+  const geometry = calculateGeometry(state);
+  const referenceGeometry = state.reference
+    ? calculateGeometry({ ...state.reference, angleHt: state.angleHt })
+    : undefined;
+  const target = getTargetOffset(state);
+  const targetHeightDifference = target
+    ? geometry.totalRise - target.rise
+    : 0;
+  const targetReachDifference = target
+    ? geometry.totalRun - target.run
+    : 0;
+
+  useEffect(() => {
+    if (target && !restorableSetup) {
+      rememberRestorableSetup({
+        orientation: state.orientation,
+        spacer: state.spacer,
+        stem: state.stem,
+        stemAngle: state.stemAngle,
+      });
+    }
+  }, [
+    restorableSetup,
+    state.orientation,
+    state.spacer,
+    state.stem,
+    state.stemAngle,
+    target,
+  ]);
+  const solverState = useMemo<FitState>(
+    () => ({
+      ...INITIAL_FIT_STATE,
+      angleHt: state.angleHt,
+      stack: state.stack,
+      reach: state.reach,
+      handlebarStack: state.handlebarStack,
+      handlebarReach: state.handlebarReach,
+    }),
+    [
+      state.angleHt,
+      state.handlebarReach,
+      state.handlebarStack,
+      state.reach,
+      state.stack,
+    ]
+  );
+  const fixedMatches = useMemo(
+    () => findFixedMatches(solverState),
+    [solverState]
+  );
+  const adjustable = useMemo(
+    () => findAdjustableFallback(solverState, fixedMatches),
+    [fixedMatches, solverState]
+  );
+  const currentMatch = useMemo(
+    () =>
+      restorableSetup
+        ? createSetupMatch(solverState, restorableSetup, "current")
+        : undefined,
+    [restorableSetup, solverState]
+  );
+
+  const updateField = <Field extends keyof FitState>(
+    field: Field,
+    value: FitState[Field]
+  ) => {
+    dispatch({ type: "update", field, value });
+  };
+
+  const updateMeasurement = (field: MeasurementField, rawValue: string) => {
+    setDrafts((current) => ({ ...current, [field]: rawValue }));
+
+    if (rawValue === "") {
+      setErrors((current) => ({ ...current, [field]: undefined }));
+      updateField(field, "");
+      return;
+    }
+
+    if (!/^\d+(?:\.\d*)?$/.test(rawValue)) {
+      setErrors((current) => ({
+        ...current,
+        [field]: "Enter a positive number",
+      }));
+      updateField(field, "");
+      return;
+    }
+
+    const numericValue = Number(rawValue);
+    if (!Number.isFinite(numericValue)) {
+      setErrors((current) => ({
+        ...current,
+        [field]: "Enter a smaller number",
+      }));
+      updateField(field, "");
+      return;
+    }
+
+    setErrors((current) => ({ ...current, [field]: undefined }));
+    if (!rawValue.endsWith(".")) {
+      updateField(field, numericValue);
+    }
+  };
+
+  const commitControlValue = (field: ControlField, value: number) => {
+    expandBounds({ ...state, [field]: value });
+  };
+
+  const loadSetup = (setup: StemSetup) => {
+    dispatch({ type: "loadSetup", payload: { ...setup } });
+  };
+
+  const resultRise = referenceGeometry
+    ? geometry.totalRise - referenceGeometry.totalRise
+    : geometry.totalRise;
+  const resultRun = referenceGeometry
+    ? geometry.totalRun - referenceGeometry.totalRun
+    : geometry.totalRun;
+  const installedAngle = geometry.installedStemAngle;
 
   return (
     <>
-      <title>{`${state.name ?? ""} Bicycle Stem & Fit Calculator`}</title>
-      <div className="name">
-        <Typography style={{ width: 250 }} variant="h6">
-          Name your configuration
-        </Typography>
-        <div id="name">
-          <NameField
-            value={state.name}
-            hasError={hasError("name")}
-            isDisabled={isDisabled("name")}
-            onChange={(value) =>
-              validateTextField("name", value, setInputError, dispatch)
-            }
-          />
-        </div>
-      </div>
+      <Head>
+        <title>{`${state.name ? `${state.name} · ` : ""}Bike stem calculator`}</title>
+      </Head>
 
-      <div className={styles.frame}>
-        <Typography variant="h6">Frame</Typography>
-        <div id="frame">
-          <NumericField
-            field="stack"
-            value={state.stack}
-            label="Stack (mm)"
-            hasError={hasError("stack")}
-            isDisabled={isDisabled("stack")}
-            onChange={(value) =>
-              validateNumericField("stack", value, setInputError, dispatch)
-            }
-          />
-          <NumericField
-            field="reach"
-            value={state.reach}
-            label="Reach (mm)"
-            hasError={hasError("reach")}
-            isDisabled={isDisabled("reach")}
-            onChange={(value) =>
-              validateNumericField("reach", value, setInputError, dispatch)
-            }
-          />
-        </div>
-      </div>
-
-      <div className={styles.fit}>
-        <Typography variant="h6">
-          Fit{" "}
-          <Tooltip
-            title={fitTooltip}
-            leaveTouchDelay={10000}
-            enterTouchDelay={5}
-          >
-            <InfoIcon fontSize="small" sx={{ color: "orange" }} />
-          </Tooltip>
-        </Typography>
-        <div id="handlebar_x_y">
-          <NumericField
-            field="handlebarStack"
-            value={state.handlebarStack}
-            label="HY (mm)"
-            hasError={hasError("handlebarStack")}
-            isDisabled={isDisabled("handlebarStack")}
-            onChange={(value) =>
-              validateNumericField(
-                "handlebarStack",
-                value,
-                setInputError,
-                dispatch
-              )
-            }
-          />
-          <NumericField
-            field="handlebarReach"
-            value={state.handlebarReach}
-            label="HX (mm)"
-            hasError={hasError("handlebarReach")}
-            isDisabled={isDisabled("handlebarReach")}
-            onChange={(value) =>
-              validateNumericField(
-                "handlebarReach",
-                value,
-                setInputError,
-                dispatch
-              )
-            }
-          />
-        </div>
-      </div>
-
-      <div className={styles.diff}>
-        <Typography>{stackMessage}</Typography>
-        <Typography>{reachMessage}</Typography>
-        <hr />
-      </div>
-
-      <div className={styles.sliderContainer}>
-        <Typography variant="h5">Result</Typography>
-        <div className={styles.riserun}>
-          <Typography>
-            {totalRise < 0 ? "- Stack: " : "+ Stack: "}
-            {Math.round(Math.abs(spacerRise + stemRise))}mm
-          </Typography>
-          <Typography>+ Reach: {`${Math.round(totalRun)}mm`}</Typography>
-        </div>
-        <div className={styles.slider}>
-          <Slider
-            name="spacer"
-            disabled={isDisabled("spacer")}
-            min={0}
-            max={200}
-            value={state.spacer}
-            aria-label="spacer_slider"
-            valueLabelDisplay="on"
-            onChange={(_, value) =>
-              handleSliderChange("spacer", value as number)
-            }
-            marks={[
-              { value: 0, label: "0mm" },
-              {
-                value: 100,
-                label: <SpacerLabel tooltip={spacerTooltip} />,
-              },
-              { value: 200, label: "200mm" },
-            ]}
-          />
-        </div>
-
-        <div className={styles.slider}>
-          <Slider
-            name="stem"
-            disabled={isDisabled("stem")}
-            min={70}
-            max={140}
-            step={10}
-            value={state.stem}
-            aria-label="stem_slider"
-            valueLabelDisplay="on"
-            onChange={(_, value) => handleSliderChange("stem", value as number)}
-            marks={[
-              { value: 70, label: "70mm" },
-              { value: 105, label: "Stem Length" },
-              { value: 140, label: "140mm" },
-            ]}
-          />
-        </div>
-
-        <div className={styles.slider}>
-          <Slider
-            name="angleHt"
-            disabled={isDisabled("angleHt")}
-            min={65}
-            max={85}
-            step={0.25}
-            value={state.angleHt}
-            aria-label="angleht_slider"
-            valueLabelDisplay="on"
-            onChange={(_, value) =>
-              handleSliderChange("angleHt", value as number)
-            }
-            marks={[
-              { value: 65, label: <>65&deg;</> },
-              { value: 75, label: "Headtube Angle" },
-              { value: 85, label: <>85&deg;</> },
-            ]}
-          />
-        </div>
-
-        <div className={styles.slider}>
-          <Slider
-            name="angleStem"
-            disabled={isDisabled("angleStem")}
-            min={-60}
-            max={60}
-            value={state.angleStem}
-            aria-label="anglestem_slider"
-            valueLabelDisplay="on"
-            onChange={(_, value) =>
-              handleSliderChange("angleStem", value as number)
-            }
-            marks={[
-              { value: -60, label: <>-60&deg;</> },
-              {
-                value: 0,
-                label: <StemAngleLabel tooltip={stemAngleTooltip} />,
-              },
-              { value: 60, label: <>60&deg;</> },
-            ]}
-          />
-        </div>
-      </div>
-
-      <div className={styles.drawing}>
-        <svg
-          width="250"
-          height="325"
-          version="1.1"
-          xmlns="http://www.w3.org/2000/svg"
+      <div className={styles.calculatorGrid}>
+        <div className={styles.explorer}>
+          <section
+          className={`${styles.card} ${styles.setupCard}`}
+          aria-labelledby="setup-title"
         >
-          <line
-            aria-label="spacer"
-            x1={state.stemXOrigin / SHRINK_FACTOR}
-            y1={state.stemYOrigin / SHRINK_FACTOR}
-            x2={topOfHTX / SHRINK_FACTOR}
-            y2={topOfHTY / SHRINK_FACTOR}
-            stroke="orange"
-            strokeWidth="5"
+          <label className={`${styles.nameField} ${styles.topNameField}`}>
+            <span>Setup name <small>optional</small></span>
+            <input
+              name="name"
+              maxLength={100}
+              value={state.name}
+              placeholder="My road bike"
+              onChange={(event) => updateField("name", event.target.value)}
+            />
+          </label>
+          <p className={styles.eyebrow}>Current setup</p>
+          <h2 id="setup-title">Stem &amp; spacers</h2>
+
+          <RangeControl
+            label="Spacer stack"
+            value={state.spacer}
+            min={Math.min(controlBounds.spacerMin, state.spacer)}
+            max={Math.max(controlBounds.spacerMax, state.spacer)}
+            step={1}
+            hardMin={0}
+            unit=" mm"
+            ariaLabel="Spacer stack"
+            onChange={(value) => updateField("spacer", value)}
+            onCommit={(value) => commitControlValue("spacer", value)}
+            tooltip={
+              <>
+                Measure the complete stack along the steerer from the top of
+                the head tube to the stem clamp: the headset top cover plus
+                every spacer. You can add or remove spacers. Follow the frame
+                and fork makers’ limits; carbon steerers are commonly limited
+                to roughly 40 mm.
+              </>
+            }
           />
-          <line
-            aria-label="stem"
-            x1={topOfHTX / SHRINK_FACTOR}
-            y1={topOfHTY / SHRINK_FACTOR}
-            x2={stemEndX / SHRINK_FACTOR}
-            y2={stemEndY / SHRINK_FACTOR}
-            stroke="blue"
-            strokeWidth="5"
+          <RangeControl
+            label="Stem length"
+            value={state.stem}
+            min={Math.min(controlBounds.stemMin, state.stem)}
+            max={Math.max(controlBounds.stemMax, state.stem)}
+            step={10}
+            hardMin={1}
+            unit=" mm"
+            ariaLabel="Stem length"
+            onChange={(value) => updateField("stem", value)}
+            onCommit={(value) => commitControlValue("stem", value)}
+            detail="center to center"
           />
-        </svg>
+          <RangeControl
+            label="Printed stem angle"
+            value={state.stemAngle}
+            min={Math.min(controlBounds.stemAngleMin, state.stemAngle)}
+            max={Math.max(controlBounds.stemAngleMax, state.stemAngle)}
+            step={0.5}
+            hardMin={0}
+            unit="°"
+            ariaLabel="Printed stem angle"
+            onChange={(value) => updateField("stemAngle", value)}
+            onCommit={(value) => commitControlValue("stemAngle", value)}
+            tooltip={
+              <>
+                Use the angle printed on the stem. The up or flipped control
+                tells the calculator how the stem is installed; the diagram
+                shows its resulting angle from horizontal.
+              </>
+            }
+          />
+          <RangeControl
+            label="Head tube angle"
+            value={state.angleHt}
+            min={Math.min(controlBounds.headTubeAngleMin, state.angleHt)}
+            max={Math.max(controlBounds.headTubeAngleMax, state.angleHt)}
+            step={0.25}
+            hardMin={1}
+            hardMax={179}
+            unit="°"
+            ariaLabel="Head tube angle"
+            onChange={(value) => updateField("angleHt", value)}
+            onCommit={(value) => commitControlValue("angleHt", value)}
+          />
+
+          <div
+            className={styles.orientationControl}
+            role="group"
+            aria-labelledby="orientation-label"
+          >
+            <span id="orientation-label" className={styles.orientationLabel}>
+              Orientation
+            </span>
+            <button
+              type="button"
+              aria-pressed={state.orientation === "up"}
+              onClick={() => updateField("orientation", "up")}
+            >
+              <span aria-hidden="true">↗</span> Up
+            </button>
+            <button
+              type="button"
+              aria-pressed={state.orientation === "flipped"}
+              onClick={() => updateField("orientation", "flipped")}
+            >
+              <span aria-hidden="true">↘</span> Flipped
+            </button>
+          </div>
+          <p className={styles.installedAngleReadout}>
+            Installed angle: <strong>{installedAngleDescription(installedAngle)}</strong>
+          </p>
+          </section>
+
+          <section
+          className={`${styles.card} ${styles.resultCard}`}
+          aria-labelledby="result-title"
+        >
+          <div className={styles.resultHeader}>
+            <div>
+              <p className={styles.eyebrow}>
+                {state.reference ? "Compared with" : "Cockpit position"}
+              </p>
+              <h2 id="result-title">
+                {state.reference
+                  ? setupDescription(state.reference)
+                  : "From the head tube top"}
+              </h2>
+            </div>
+            {state.reference ? (
+              <button
+                type="button"
+                className={styles.secondaryButton}
+                onClick={() => updateField("reference", null)}
+              >
+                Stop comparing
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={styles.secondaryButton}
+                onClick={() => updateField("reference", currentSetup(state))}
+              >
+                Pin this setup and compare a new one
+              </button>
+            )}
+          </div>
+
+          <div className={styles.bigResults} aria-live="polite">
+            <div>
+              <strong>{signedMillimetres(resultRise)}</strong>
+              <span>mm height</span>
+            </div>
+            <div>
+              <strong>{signedMillimetres(resultRun)}</strong>
+              <span>mm reach</span>
+            </div>
+          </div>
+
+          {state.reference ? (
+            <p className={styles.referenceSummary}>
+              Change in handlebar height and reach from the setup named above.
+            </p>
+          ) : (
+            <p className={styles.resultExplanation}>
+              Height and reach are measured from the top of the head tube to
+              the handlebar center.
+            </p>
+          )}
+
+          {target ? (
+            <div className={styles.targetStatus}>
+              <span>Compared with target</span>
+              <strong
+                className={targetProximityClass(targetHeightDifference)}
+                data-axis="height"
+                data-proximity={getTargetProximity(targetHeightDifference)}
+              >
+                Height:{" "}
+                {formatAxisDifference(
+                  targetHeightDifference,
+                  "low",
+                  "high"
+                )}
+              </strong>
+              <strong
+                className={targetProximityClass(targetReachDifference)}
+                data-axis="reach"
+                data-proximity={getTargetProximity(targetReachDifference)}
+              >
+                Reach:{" "}
+                {formatAxisDifference(
+                  targetReachDifference,
+                  "short",
+                  "long"
+                )}
+              </strong>
+            </div>
+          ) : null}
+
+          <CockpitDrawing state={state} />
+          <div className={styles.drawingLegend} aria-label="Diagram key">
+            <span className={styles.legendHeadTube}>Head tube</span>
+            {state.reference ? (
+              <span className={styles.legendPinnedSetup}>Pinned setup</span>
+            ) : null}
+            <span
+              className={
+                state.reference
+                  ? styles.legendCurrentSetup
+                  : styles.legendPinnedSetup
+              }
+            >
+              Current setup
+            </span>
+            {target ? (
+              <span className={styles.legendTarget}>Fit target</span>
+            ) : null}
+          </div>
+          </section>
+        </div>
+
+        <section
+          className={`${styles.card} ${styles.fitCard}`}
+          aria-labelledby="frame-title"
+        >
+          <div className={styles.inputGroup}>
+            <p className={styles.eyebrow}>Your frame</p>
+            <h2 id="frame-title">Frame geometry</h2>
+            <div className={styles.measurementGrid}>
+              <MeasurementInput
+                field="stack"
+                label="Frame stack"
+                hint="Bottom bracket to head tube top"
+                value={drafts.stack ?? state.stack}
+                error={errors.stack}
+                onChange={(value) => updateMeasurement("stack", value)}
+              />
+              <MeasurementInput
+                field="reach"
+                label="Frame reach"
+                hint="Bottom bracket to head tube top"
+                value={drafts.reach ?? state.reach}
+                error={errors.reach}
+                onChange={(value) => updateMeasurement("reach", value)}
+              />
+            </div>
+          </div>
+
+          <div className={styles.inputGroup}>
+            <div className={styles.fitTargetHeading}>
+              <div>
+                <p className={styles.eyebrow}>Your fit target</p>
+                <h2>Handlebar center</h2>
+              </div>
+              <InfoTip id="fit-target-tip" label="About HY and HX">
+                HY and HX are measured from the bottom bracket to the center of
+                the handlebars. {" "}
+                <a
+                  href="https://web.archive.org/web/20200809061637/https://www.slowtwitch.com/Bike_Fit/The_Secret_Weapon_of_Superstar_Fitters_HX_6335.html"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  This article
+                </a>{" "}
+                is a good explanation of why these measurements matter.
+              </InfoTip>
+            </div>
+            <div className={styles.measurementGrid}>
+              <MeasurementInput
+                field="handlebarStack"
+                label="HY · handlebar height"
+                hint="Measured from the bottom bracket"
+                value={drafts.handlebarStack ?? state.handlebarStack}
+                error={errors.handlebarStack}
+                onChange={(value) =>
+                  updateMeasurement("handlebarStack", value)
+                }
+              />
+              <MeasurementInput
+                field="handlebarReach"
+                label="HX · handlebar reach"
+                hint="Measured from the bottom bracket"
+                value={drafts.handlebarReach ?? state.handlebarReach}
+                error={errors.handlebarReach}
+                onChange={(value) =>
+                  updateMeasurement("handlebarReach", value)
+                }
+              />
+            </div>
+          </div>
+
+        </section>
+
+        <MatchingSetups
+          state={state}
+          matches={fixedMatches}
+          currentMatch={currentMatch}
+          adjustable={adjustable}
+          complete={Boolean(target)}
+          onLoad={loadSetup}
+        />
       </div>
     </>
   );
