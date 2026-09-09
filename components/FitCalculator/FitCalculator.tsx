@@ -551,7 +551,7 @@ const FitCalculator = () => {
   return (
     <>
       <Head>
-        <title>{`${state.name ? `${state.name} · ` : ""}Bike stem calculator`}</title>
+        <title>{`${state.name ? `${state.name} · ` : ""}Bike Stem Calculator | BikeStem.fit`}</title>
       </Head>
 
       <div className={styles.calculatorGrid}>

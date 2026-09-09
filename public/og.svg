@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
+  <title id="title">BikeStem.fit bike stem calculator</title>
+  <desc id="description">A simple bike stem and spacer diagram beside the BikeStem.fit name</desc>
+  <defs>
+    <pattern id="grid" width="42" height="42" patternUnits="userSpaceOnUse">
+      <path d="M 42 0 L 0 0 0 42" fill="none" stroke="#34383d" stroke-opacity="0.07" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="#f7f7f6"/>
+  <rect x="48" y="48" width="1104" height="534" rx="24" fill="#ffffff" stroke="#e2e2e0" stroke-width="2"/>
+  <rect x="618" y="49" width="533" height="532" rx="23" fill="url(#grid)"/>
+
+  <text x="104" y="188" fill="#34383d" font-family="Arial Narrow, Helvetica Neue, Arial, sans-serif" font-size="78" font-weight="800" letter-spacing="-5">BIKESTEM<tspan fill="#535b63">.FIT</tspan></text>
+  <text x="108" y="254" fill="#535b63" font-family="Helvetica Neue, Arial, sans-serif" font-size="31" font-weight="500">Bike stem calculator</text>
+  <line x1="108" y1="308" x2="466" y2="308" stroke="#e2e2e0" stroke-width="2"/>
+  <text x="108" y="365" fill="#34383d" font-family="Helvetica Neue, Arial, sans-serif" font-size="22">Compare stem setups in real time.</text>
+  <text x="108" y="402" fill="#34383d" font-family="Helvetica Neue, Arial, sans-serif" font-size="22">Match frame geometry to your fit target.</text>
+
+  <line x1="779" y1="321" x2="1080" y2="321" stroke="#606870" stroke-width="3"/>
+  <line x1="850" y1="531" x2="779" y2="321" stroke="#606870" stroke-width="30" stroke-linecap="butt"/>
+  <circle cx="779" cy="321" r="13" fill="#ffffff" stroke="#606870" stroke-width="6"/>
+  <line x1="779" y1="321" x2="767" y2="260" stroke="#245fcc" stroke-width="14" stroke-linecap="butt"/>
+  <line x1="767" y1="260" x2="999" y2="165" stroke="#245fcc" stroke-width="14" stroke-linecap="butt"/>
+  <circle cx="999" cy="165" r="12" fill="#ffffff" stroke="#245fcc" stroke-width="7"/>
+  <line x1="767" y1="260" x2="1046" y2="146" stroke="#c0392b" stroke-width="14" stroke-linecap="butt"/>
+  <circle cx="1046" cy="146" r="12" fill="#ffffff" stroke="#c0392b" stroke-width="7"/>
+  <circle cx="1019" cy="153" r="28" fill="none" stroke="#9a7300" stroke-width="4" stroke-dasharray="7 7"/>
+
+  <g font-family="Helvetica Neue, Arial, sans-serif" font-size="17" font-weight="600">
+    <line x1="684" y1="106" x2="724" y2="106" stroke="#245fcc" stroke-width="7"/>
+    <text x="737" y="112" fill="#535b63">Pinned setup</text>
+    <line x1="900" y1="106" x2="940" y2="106" stroke="#c0392b" stroke-width="7"/>
+    <text x="953" y="112" fill="#535b63">Current setup</text>
+  </g>
+</svg>
