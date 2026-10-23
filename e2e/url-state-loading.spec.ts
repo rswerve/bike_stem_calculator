@@ -164,10 +164,11 @@ test.describe("bike stem calculator", () => {
     const stemValue = controlValue(page, "Stem length");
 
     await stemValue.focus();
-    const focusShadow = await stemValue.evaluate(
-      (input) => getComputedStyle(input.parentElement!).boxShadow
+    await expect(stemValue).toBeFocused();
+    await expect(stemValue.locator("..")).toHaveCSS(
+      "box-shadow",
+      /96, 104, 112/
     );
-    expect(focusShadow).toContain("96, 104, 112");
 
     await stemValue.fill("1234567");
     const valueWidth = await stemValue.evaluate((input) => ({
