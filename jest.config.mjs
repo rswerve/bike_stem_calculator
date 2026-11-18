@@ -4,9 +4,8 @@ const createJestConfig = nextJest({ dir: "./" });
 
 const customJestConfig = {
   collectCoverageFrom: [
-    "**/*.{js,jsx,ts,tsx}",
+    "{components,hooks,pages}/**/*.{js,jsx,ts,tsx}",
     "!**/*.d.ts",
-    "!**/node_modules/**",
   ],
   moduleNameMapper: {
     "^.+\\.module\\.(css|sass|scss)$": "identity-obj-proxy",

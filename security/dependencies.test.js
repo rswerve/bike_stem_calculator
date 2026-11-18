@@ -1,4 +1,5 @@
 import path from "node:path";
+import { execFileSync } from "node:child_process";
 import { createRequire } from "node:module";
 import { X509Certificate } from "node:crypto";
 import { rootCertificates } from "node:tls";
@@ -6,6 +7,40 @@ import { SourceMapConsumer } from "source-map-js";
 import { packages } from "../package-lock.json";
 
 const loadPackage = createRequire(__filename);
+
+test("Jest coverage includes app source and excludes generated output", () => {
+  const jestBin = loadPackage.resolve("jest/bin/jest");
+  const { configs } = JSON.parse(
+    execFileSync(process.execPath, [jestBin, "--showConfig"], {
+      cwd: path.resolve(__dirname, ".."),
+      encoding: "utf8",
+    }),
+  );
+  const { globsToMatcher } = loadPackage("jest-util");
+  const includesSource = globsToMatcher(configs[0].collectCoverageFrom);
+
+  expect(includesSource("components/FitCalculator/FitCalculator.tsx")).toBe(true);
+  expect(includesSource("hooks/useDebounce.jsx")).toBe(true);
+  expect(includesSource("pages/api/hello.js")).toBe(true);
+  expect(includesSource(".next/server/pages/index.js")).toBe(false);
+  expect(includesSource("coverage/lcov-report/sorter.js")).toBe(false);
+});
+
+test("Jest coverage discovers calculator source and excludes its tests", () => {
+  const loadCoverageDependency = createRequire(
+    loadPackage.resolve("babel-plugin-istanbul"),
+  );
+  const TestExclude = loadCoverageDependency("test-exclude");
+  const files = new TestExclude({
+    cwd: path.resolve(__dirname, ".."),
+    include: ["components/FitCalculator/**"],
+    exclude: ["**/*.test.tsx"],
+    extension: [".tsx"],
+  }).globSync();
+
+  expect(files).toContain("components/FitCalculator/FitCalculator.tsx");
+  expect(files).not.toContain("components/FitCalculator/FitCalculator.test.tsx");
+});
 
 const braceExpansionPaths = Object.keys(packages).filter((packagePath) =>
   packagePath.endsWith("/brace-expansion"),
