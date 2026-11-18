@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
-    "next": "^16.4.2",
+    "next": "^16.4.6",
     "nuqs": "^2.10.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
